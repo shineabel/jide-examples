@@ -1,0 +1,2083 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+*** GENERATED FROM project.xml - DO NOT EDIT  ***
+***         EDIT ../build.xml INSTEAD         ***
+
+For the purpose of easier reading the script
+is divided into following sections:
+
+  - initialization
+  - compilation
+  - jar
+  - execution
+  - debugging
+  - javadoc
+  - junit compilation
+  - junit execution
+  - junit debugging
+  - applet
+  - cleanup
+
+        -->
+<project xmlns:j2seproject1="http://www.netbeans.org/ns/j2se-project/1"
+         xmlns:j2seproject3="http://www.netbeans.org/ns/j2se-project/3"
+         basedir=".." default="default" name="JideDemos-impl">
+    <fail message="Please build using Ant 1.8.0 or higher.">
+        <condition>
+            <not>
+                <antversion atleast="1.8.0"/>
+            </not>
+        </condition>
+    </fail>
+    <target depends="test,jar,javadoc" description="Build and test whole project." name="default"/>
+    <!-- 
+                ======================
+                INITIALIZATION SECTION 
+                ======================
+            -->
+    <target name="-pre-init">
+        <!-- Empty placeholder for easier customization. -->
+        <!-- You can override this target in the ../build.xml file. -->
+    </target>
+    <target depends="-pre-init" name="-init-private">
+        <property file="nbproject/private/config.properties"/>
+        <property file="nbproject/private/configs/${config}.properties"/>
+        <property file="nbproject/private/private.properties"/>
+    </target>
+    <target name="-pre-init-libraries">
+        <property location=".\nblibraries.properties" name="libraries.path"/>
+        <dirname file="${libraries.path}" property="libraries.dir.nativedirsep"/>
+        <pathconvert dirsep="/" property="libraries.dir">
+            <path path="${libraries.dir.nativedirsep}"/>
+        </pathconvert>
+        <basename file="${libraries.path}" property="libraries.basename" suffix=".properties"/>
+        <available file="${libraries.dir}/${libraries.basename}-private.properties"
+                   property="private.properties.available"/>
+    </target>
+    <target depends="-pre-init-libraries" if="private.properties.available" name="-init-private-libraries">
+        <loadproperties encoding="ISO-8859-1" srcfile="${libraries.dir}/${libraries.basename}-private.properties">
+            <filterchain>
+                <replacestring from="$${base}" to="${libraries.dir}"/>
+                <escapeunicode/>
+            </filterchain>
+        </loadproperties>
+    </target>
+    <target depends="-pre-init,-init-private,-init-private-libraries" name="-init-libraries">
+        <loadproperties encoding="ISO-8859-1" srcfile="${libraries.path}">
+            <filterchain>
+                <replacestring from="$${base}" to="${libraries.dir}"/>
+                <escapeunicode/>
+            </filterchain>
+        </loadproperties>
+    </target>
+    <target depends="-pre-init,-init-private,-init-libraries" name="-init-user">
+        <property file="${user.properties.file}"/>
+        <!-- The two properties below are usually overridden -->
+        <!-- by the active platform. Just a fallback. -->
+        <property name="default.javac.source" value="1.4"/>
+        <property name="default.javac.target" value="1.4"/>
+    </target>
+    <target depends="-pre-init,-init-private,-init-libraries,-init-user" name="-init-project">
+        <property file="nbproject/configs/${config}.properties"/>
+        <property file="nbproject/project.properties"/>
+    </target>
+    <target depends="-pre-init,-init-private,-init-libraries,-init-user,-init-project,-init-macrodef-property"
+            name="-do-init">
+        <j2seproject1:property name="platform.home" value="platforms.${platform.active}.home"/>
+        <j2seproject1:property name="platform.bootcp" value="platforms.${platform.active}.bootclasspath"/>
+        <j2seproject1:property name="platform.compiler" value="platforms.${platform.active}.compile"/>
+        <j2seproject1:property name="platform.javac.tmp" value="platforms.${platform.active}.javac"/>
+        <condition property="platform.javac" value="${platform.home}/bin/javac">
+            <equals arg1="${platform.javac.tmp}" arg2="$${platforms.${platform.active}.javac}"/>
+        </condition>
+        <property name="platform.javac" value="${platform.javac.tmp}"/>
+        <j2seproject1:property name="platform.java.tmp" value="platforms.${platform.active}.java"/>
+        <condition property="platform.java" value="${platform.home}/bin/java">
+            <equals arg1="${platform.java.tmp}" arg2="$${platforms.${platform.active}.java}"/>
+        </condition>
+        <property name="platform.java" value="${platform.java.tmp}"/>
+        <j2seproject1:property name="platform.javadoc.tmp" value="platforms.${platform.active}.javadoc"/>
+        <condition property="platform.javadoc" value="${platform.home}/bin/javadoc">
+            <equals arg1="${platform.javadoc.tmp}" arg2="$${platforms.${platform.active}.javadoc}"/>
+        </condition>
+        <property name="platform.javadoc" value="${platform.javadoc.tmp}"/>
+        <condition property="platform.invalid" value="true">
+            <or>
+                <contains string="${platform.javac}" substring="$${platforms."/>
+                <contains string="${platform.java}" substring="$${platforms."/>
+                <contains string="${platform.javadoc}" substring="$${platforms."/>
+            </or>
+        </condition>
+        <fail unless="platform.home">Must set platform.home</fail>
+        <fail unless="platform.bootcp">Must set platform.bootcp</fail>
+        <fail unless="platform.java">Must set platform.java</fail>
+        <fail unless="platform.javac">Must set platform.javac</fail>
+        <fail if="platform.invalid">
+            The J2SE Platform is not correctly set up.
+            Your active platform is: ${platform.active}, but the corresponding property
+            "platforms.${platform.active}.home" is not found in the project's properties files.
+            Either open the project in the IDE and setup the Platform with the same name or add it manually.
+            For example like this:
+            ant -Duser.properties.file=&lt;path_to_property_file&gt; jar (where you put the property
+            "platforms.${platform.active}.home" in a .properties file)
+            or ant -Dplatforms.${platform.active}.home=&lt;path_to_JDK_home&gt; jar (where no properties file is used)
+        </fail>
+        <available file="${manifest.file}" property="manifest.available"/>
+        <condition property="splashscreen.available">
+            <and>
+                <not>
+                    <equals arg1="${application.splash}" arg2="" trim="true"/>
+                </not>
+                <available file="${application.splash}"/>
+            </and>
+        </condition>
+        <condition property="main.class.available">
+            <and>
+                <isset property="main.class"/>
+                <not>
+                    <equals arg1="${main.class}" arg2="" trim="true"/>
+                </not>
+            </and>
+        </condition>
+        <condition property="manifest.available+main.class">
+            <and>
+                <isset property="manifest.available"/>
+                <isset property="main.class.available"/>
+            </and>
+        </condition>
+        <condition property="do.archive">
+            <not>
+                <istrue value="${jar.archive.disabled}"/>
+            </not>
+        </condition>
+        <condition property="do.mkdist">
+            <and>
+                <isset property="do.archive"/>
+                <isset property="libs.CopyLibs.classpath"/>
+                <not>
+                    <istrue value="${mkdist.disabled}"/>
+                </not>
+            </and>
+        </condition>
+        <condition property="manifest.available+main.class+mkdist.available">
+            <and>
+                <istrue value="${manifest.available+main.class}"/>
+                <isset property="do.mkdist"/>
+            </and>
+        </condition>
+        <condition property="do.archive+manifest.available">
+            <and>
+                <isset property="manifest.available"/>
+                <istrue value="${do.archive}"/>
+            </and>
+        </condition>
+        <condition property="do.archive+main.class.available">
+            <and>
+                <isset property="main.class.available"/>
+                <istrue value="${do.archive}"/>
+            </and>
+        </condition>
+        <condition property="do.archive+splashscreen.available">
+            <and>
+                <isset property="splashscreen.available"/>
+                <istrue value="${do.archive}"/>
+            </and>
+        </condition>
+        <condition property="do.archive+manifest.available+main.class">
+            <and>
+                <istrue value="${manifest.available+main.class}"/>
+                <istrue value="${do.archive}"/>
+            </and>
+        </condition>
+        <condition property="manifest.available-mkdist.available">
+            <or>
+                <istrue value="${manifest.available}"/>
+                <isset property="do.mkdist"/>
+            </or>
+        </condition>
+        <condition property="manifest.available+main.class-mkdist.available">
+            <or>
+                <istrue value="${manifest.available+main.class}"/>
+                <isset property="do.mkdist"/>
+            </or>
+        </condition>
+        <condition property="have.tests">
+            <or/>
+        </condition>
+        <condition property="have.sources">
+            <or>
+                <available file="${src.dir}"/>
+                <available file="${A2.SampleVsnet.dir}"/>
+                <available file="${A4.ThreeActionFramework.dir}"/>
+                <available file="${B1.Layouts.dir}"/>
+                <available file="${B10.CheckBoxList.dir}"/>
+                <available file="${B11.AutosizingTextArea.dir}"/>
+                <available file="${B12.IndeterminateProgressBar.dir}"/>
+                <available file="${B13.AutoCompletion.dir}"/>
+                <available file="${B14.IntelliHints.dir}"/>
+                <available file="${B15.StyledLabel.dir}"/>
+                <available file="${B16.CheckBoxTree.dir}"/>
+                <available file="${B17.RangeSlider.dir}"/>
+                <available file="${B18.FolderChooser.dir}"/>
+                <available file="${B19.Overlayable.dir}"/>
+                <available file="${B2.IconsFactory.dir}"/>
+                <available file="${B20.TitledSeparator.dir}"/>
+                <available file="${B21.MarqueePane.dir}"/>
+                <available file="${B3.Borders.dir}"/>
+                <available file="${B4.JideButton.dir}"/>
+                <available file="${B5.JideSplitPane.dir}"/>
+                <available file="${B6.JideTabbedPane.dir}"/>
+                <available file="${B7.SearchableComponents.dir}"/>
+                <available file="${B8.JideScrollPane.dir}"/>
+                <available file="${B9.Popup.dir}"/>
+                <available file="${C1.DocumentPane.dir}"/>
+                <available file="${C2.StatusBar.dir}"/>
+                <available file="${C3.CollapsiblePane.dir}"/>
+                <available file="${C4.FloorTabbedPane.dir}"/>
+                <available file="${C6.Alert.dir}"/>
+                <available file="${C7.Tip.dir}"/>
+                <available file="${C8.BreadcrumbBar.dir}"/>
+                <available file="${C9.NavigationComponent.dir}"/>
+                <available file="${D1.DockingFramework.dir}"/>
+                <available file="${D2.TwoDockingFramework.dir}"/>
+                <available file="${D3.InitialLayoutDockingFramework.dir}"/>
+                <available file="${Demo.dir}"/>
+                <available file="${E1.CodeEditor.dir}"/>
+                <available file="${F1.FeedReader.dir}"/>
+                <available file="${G1.PropertyPane.dir}"/>
+                <available file="${G10.TableScrollPane.dir}"/>
+                <available file="${G11.TableSplitPane.dir}"/>
+                <available file="${G12.JideTable.dir}"/>
+                <available file="${G13.DirectionChooserDemo.dir}"/>
+                <available file="${G14.Converter.dir}"/>
+                <available file="${G15.QuickFilter.dir}"/>
+                <available file="${G16.SpanTable.dir}"/>
+                <available file="${G17.StyleTable.dir}"/>
+                <available file="${G18.TreeTable.dir}"/>
+                <available file="${G19.SortableList.dir}"/>
+                <available file="${G2.SortableTable.dir}"/>
+                <available file="${G20.SortableTree.dir}"/>
+                <available file="${G21.Spinners.dir}"/>
+                <available file="${G22.ImagePreviewList.dir}"/>
+                <available file="${G23.TextFields.dir}"/>
+                <available file="${G24.Calculator.dir}"/>
+                <available file="${G25.CachedTableModel.dir}"/>
+                <available file="${G26.ContextSensitiveTable.dir}"/>
+                <available file="${G27.TableHeader.dir}"/>
+                <available file="${G28.GroupTable.dir}"/>
+                <available file="${G29.BeanTableModel.dir}"/>
+                <available file="${G3.LargeSortableTable.dir}"/>
+                <available file="${G30.GroupList.dir}"/>
+                <available file="${G31.DualList.dir}"/>
+                <available file="${G32.NavigableTable.dir}"/>
+                <available file="${G33.CustomFilterEditor.dir}"/>
+                <available file="${G34.CellStyleEditor.dir}"/>
+                <available file="${G35.ShrinkSearchableSupport.dir}"/>
+                <available file="${G36.TransposeTableModel.dir}"/>
+                <available file="${G37.MarkerMargin.dir}"/>
+                <available file="${G4.ComboBoxes.dir}"/>
+                <available file="${G5.DateComboBoxes.dir}"/>
+                <available file="${G6.ColorComboBoxes.dir}"/>
+                <available file="${G7.FilterableTable.dir}"/>
+                <available file="${G8.HierarchicalTable.dir}"/>
+                <available file="${G9.TableUtilsDemo.dir}"/>
+                <available file="${H1.Dashboard.dir}"/>
+                <available file="${I1.Diff.dir}"/>
+                <available file="${N1.Gantt.dir}"/>
+                <available file="${P1.PivotTablePane.dir}"/>
+                <available file="${P2.CalculatedTableModel.dir}"/>
+                <available file="${P3.AggregateTable.dir}"/>
+                <available file="${R1.Charts.dir}"/>
+                <available file="${S1.ShortcutEditor.dir}"/>
+                <available file="${T1.NavigationBar.dir}"/>
+                <available file="${T2.DatabaseTableModel.dir}"/>
+                <available file="${T3.HibernateTableModel.dir}"/>
+                <available file="${W1.Wizard.dir}"/>
+                <available file="${W2.OptionsDialog.dir}"/>
+                <available file="${W3.TipsOfTheDay.dir}"/>
+                <available file="${W4.ButtonPanel.dir}"/>
+                <available file="${W5.BannerPanel.dir}"/>
+                <available file="${W6.StandardDialog.dir}"/>
+                <available file="${W7.JideOptionPane.dir}"/>
+            </or>
+        </condition>
+        <condition property="netbeans.home+have.tests">
+            <and>
+                <isset property="netbeans.home"/>
+                <isset property="have.tests"/>
+            </and>
+        </condition>
+        <condition property="no.javadoc.preview">
+            <and>
+                <isset property="javadoc.preview"/>
+                <isfalse value="${javadoc.preview}"/>
+            </and>
+        </condition>
+        <property name="run.jvmargs" value=""/>
+        <property name="javac.compilerargs" value=""/>
+        <property name="work.dir" value="${basedir}"/>
+        <condition property="no.deps">
+            <and>
+                <istrue value="${no.dependencies}"/>
+            </and>
+        </condition>
+        <property name="javac.debug" value="true"/>
+        <property name="javadoc.preview" value="true"/>
+        <property name="application.args" value=""/>
+        <property name="source.encoding" value="${file.encoding}"/>
+        <property name="runtime.encoding" value="${source.encoding}"/>
+        <condition property="javadoc.encoding.used" value="${javadoc.encoding}">
+            <and>
+                <isset property="javadoc.encoding"/>
+                <not>
+                    <equals arg1="${javadoc.encoding}" arg2=""/>
+                </not>
+            </and>
+        </condition>
+        <property name="javadoc.encoding.used" value="${source.encoding}"/>
+        <property name="includes" value="**"/>
+        <property name="excludes" value=""/>
+        <property name="do.depend" value="false"/>
+        <condition property="do.depend.true">
+            <istrue value="${do.depend}"/>
+        </condition>
+        <path id="endorsed.classpath.path" path="${endorsed.classpath}"/>
+        <condition else="" property="endorsed.classpath.cmd.line.arg"
+                   value="-Xbootclasspath/p:'${toString:endorsed.classpath.path}'">
+            <length length="0" string="${endorsed.classpath}" when="greater"/>
+        </condition>
+        <property name="jar.index" value="false"/>
+        <property name="jar.index.metainf" value="${jar.index}"/>
+        <property name="copylibs.rebase" value="true"/>
+        <available file="${meta.inf.dir}/persistence.xml" property="has.persistence.xml"/>
+    </target>
+    <target name="-post-init">
+        <!-- Empty placeholder for easier customization. -->
+        <!-- You can override this target in the ../build.xml file. -->
+    </target>
+    <target depends="-pre-init,-init-private,-init-libraries,-init-user,-init-project,-do-init" name="-init-check">
+        <fail unless="src.dir">Must set src.dir</fail>
+        <fail unless="A2.SampleVsnet.dir">Must set A2.SampleVsnet.dir</fail>
+        <fail unless="A4.ThreeActionFramework.dir">Must set A4.ThreeActionFramework.dir</fail>
+        <fail unless="B1.Layouts.dir">Must set B1.Layouts.dir</fail>
+        <fail unless="B10.CheckBoxList.dir">Must set B10.CheckBoxList.dir</fail>
+        <fail unless="B11.AutosizingTextArea.dir">Must set B11.AutosizingTextArea.dir</fail>
+        <fail unless="B12.IndeterminateProgressBar.dir">Must set B12.IndeterminateProgressBar.dir</fail>
+        <fail unless="B13.AutoCompletion.dir">Must set B13.AutoCompletion.dir</fail>
+        <fail unless="B14.IntelliHints.dir">Must set B14.IntelliHints.dir</fail>
+        <fail unless="B15.StyledLabel.dir">Must set B15.StyledLabel.dir</fail>
+        <fail unless="B16.CheckBoxTree.dir">Must set B16.CheckBoxTree.dir</fail>
+        <fail unless="B17.RangeSlider.dir">Must set B17.RangeSlider.dir</fail>
+        <fail unless="B18.FolderChooser.dir">Must set B18.FolderChooser.dir</fail>
+        <fail unless="B19.Overlayable.dir">Must set B19.Overlayable.dir</fail>
+        <fail unless="B2.IconsFactory.dir">Must set B2.IconsFactory.dir</fail>
+        <fail unless="B20.TitledSeparator.dir">Must set B20.TitledSeparator.dir</fail>
+        <fail unless="B21.MarqueePane.dir">Must set B21.MarqueePane.dir</fail>
+        <fail unless="B3.Borders.dir">Must set B3.Borders.dir</fail>
+        <fail unless="B4.JideButton.dir">Must set B4.JideButton.dir</fail>
+        <fail unless="B5.JideSplitPane.dir">Must set B5.JideSplitPane.dir</fail>
+        <fail unless="B6.JideTabbedPane.dir">Must set B6.JideTabbedPane.dir</fail>
+        <fail unless="B7.SearchableComponents.dir">Must set B7.SearchableComponents.dir</fail>
+        <fail unless="B8.JideScrollPane.dir">Must set B8.JideScrollPane.dir</fail>
+        <fail unless="B9.Popup.dir">Must set B9.Popup.dir</fail>
+        <fail unless="C1.DocumentPane.dir">Must set C1.DocumentPane.dir</fail>
+        <fail unless="C2.StatusBar.dir">Must set C2.StatusBar.dir</fail>
+        <fail unless="C3.CollapsiblePane.dir">Must set C3.CollapsiblePane.dir</fail>
+        <fail unless="C4.FloorTabbedPane.dir">Must set C4.FloorTabbedPane.dir</fail>
+        <fail unless="C6.Alert.dir">Must set C6.Alert.dir</fail>
+        <fail unless="C7.Tip.dir">Must set C7.Tip.dir</fail>
+        <fail unless="C8.BreadcrumbBar.dir">Must set C8.BreadcrumbBar.dir</fail>
+        <fail unless="C9.NavigationComponent.dir">Must set C9.NavigationComponent.dir</fail>
+        <fail unless="D1.DockingFramework.dir">Must set D1.DockingFramework.dir</fail>
+        <fail unless="D2.TwoDockingFramework.dir">Must set D2.TwoDockingFramework.dir</fail>
+        <fail unless="D3.InitialLayoutDockingFramework.dir">Must set D3.InitialLayoutDockingFramework.dir</fail>
+        <fail unless="Demo.dir">Must set Demo.dir</fail>
+        <fail unless="E1.CodeEditor.dir">Must set E1.CodeEditor.dir</fail>
+        <fail unless="F1.FeedReader.dir">Must set F1.FeedReader.dir</fail>
+        <fail unless="G1.PropertyPane.dir">Must set G1.PropertyPane.dir</fail>
+        <fail unless="G10.TableScrollPane.dir">Must set G10.TableScrollPane.dir</fail>
+        <fail unless="G11.TableSplitPane.dir">Must set G11.TableSplitPane.dir</fail>
+        <fail unless="G12.JideTable.dir">Must set G12.JideTable.dir</fail>
+        <fail unless="G13.DirectionChooserDemo.dir">Must set G13.DirectionChooserDemo.dir</fail>
+        <fail unless="G14.Converter.dir">Must set G14.Converter.dir</fail>
+        <fail unless="G15.QuickFilter.dir">Must set G15.QuickFilter.dir</fail>
+        <fail unless="G16.SpanTable.dir">Must set G16.SpanTable.dir</fail>
+        <fail unless="G17.StyleTable.dir">Must set G17.StyleTable.dir</fail>
+        <fail unless="G18.TreeTable.dir">Must set G18.TreeTable.dir</fail>
+        <fail unless="G19.SortableList.dir">Must set G19.SortableList.dir</fail>
+        <fail unless="G2.SortableTable.dir">Must set G2.SortableTable.dir</fail>
+        <fail unless="G20.SortableTree.dir">Must set G20.SortableTree.dir</fail>
+        <fail unless="G21.Spinners.dir">Must set G21.Spinners.dir</fail>
+        <fail unless="G22.ImagePreviewList.dir">Must set G22.ImagePreviewList.dir</fail>
+        <fail unless="G23.TextFields.dir">Must set G23.TextFields.dir</fail>
+        <fail unless="G24.Calculator.dir">Must set G24.Calculator.dir</fail>
+        <fail unless="G25.CachedTableModel.dir">Must set G25.CachedTableModel.dir</fail>
+        <fail unless="G26.ContextSensitiveTable.dir">Must set G26.ContextSensitiveTable.dir</fail>
+        <fail unless="G27.TableHeader.dir">Must set G27.TableHeader.dir</fail>
+        <fail unless="G28.GroupTable.dir">Must set G28.GroupTable.dir</fail>
+        <fail unless="G29.BeanTableModel.dir">Must set G29.BeanTableModel.dir</fail>
+        <fail unless="G3.LargeSortableTable.dir">Must set G3.LargeSortableTable.dir</fail>
+        <fail unless="G30.GroupList.dir">Must set G30.GroupList.dir</fail>
+        <fail unless="G31.DualList.dir">Must set G31.DualList.dir</fail>
+        <fail unless="G32.NavigableTable.dir">Must set G32.NavigableTable.dir</fail>
+        <fail unless="G33.CustomFilterEditor.dir">Must set G33.CustomFilterEditor.dir</fail>
+        <fail unless="G34.CellStyleEditor.dir">Must set G34.CellStyleEditor.dir</fail>
+        <fail unless="G35.ShrinkSearchableSupport.dir">Must set G35.ShrinkSearchableSupport.dir</fail>
+        <fail unless="G36.TransposeTableModel.dir">Must set G36.TransposeTableModel.dir</fail>
+        <fail unless="G37.MarkerMargin.dir">Must set G37.MarkerMargin.dir</fail>
+        <fail unless="G4.ComboBoxes.dir">Must set G4.ComboBoxes.dir</fail>
+        <fail unless="G5.DateComboBoxes.dir">Must set G5.DateComboBoxes.dir</fail>
+        <fail unless="G6.ColorComboBoxes.dir">Must set G6.ColorComboBoxes.dir</fail>
+        <fail unless="G7.FilterableTable.dir">Must set G7.FilterableTable.dir</fail>
+        <fail unless="G8.HierarchicalTable.dir">Must set G8.HierarchicalTable.dir</fail>
+        <fail unless="G9.TableUtilsDemo.dir">Must set G9.TableUtilsDemo.dir</fail>
+        <fail unless="H1.Dashboard.dir">Must set H1.Dashboard.dir</fail>
+        <fail unless="I1.Diff.dir">Must set I1.Diff.dir</fail>
+        <fail unless="N1.Gantt.dir">Must set N1.Gantt.dir</fail>
+        <fail unless="P1.PivotTablePane.dir">Must set P1.PivotTablePane.dir</fail>
+        <fail unless="P2.CalculatedTableModel.dir">Must set P2.CalculatedTableModel.dir</fail>
+        <fail unless="P3.AggregateTable.dir">Must set P3.AggregateTable.dir</fail>
+        <fail unless="R1.Charts.dir">Must set R1.Charts.dir</fail>
+        <fail unless="S1.ShortcutEditor.dir">Must set S1.ShortcutEditor.dir</fail>
+        <fail unless="T1.NavigationBar.dir">Must set T1.NavigationBar.dir</fail>
+        <fail unless="T2.DatabaseTableModel.dir">Must set T2.DatabaseTableModel.dir</fail>
+        <fail unless="T3.HibernateTableModel.dir">Must set T3.HibernateTableModel.dir</fail>
+        <fail unless="W1.Wizard.dir">Must set W1.Wizard.dir</fail>
+        <fail unless="W2.OptionsDialog.dir">Must set W2.OptionsDialog.dir</fail>
+        <fail unless="W3.TipsOfTheDay.dir">Must set W3.TipsOfTheDay.dir</fail>
+        <fail unless="W4.ButtonPanel.dir">Must set W4.ButtonPanel.dir</fail>
+        <fail unless="W5.BannerPanel.dir">Must set W5.BannerPanel.dir</fail>
+        <fail unless="W6.StandardDialog.dir">Must set W6.StandardDialog.dir</fail>
+        <fail unless="W7.JideOptionPane.dir">Must set W7.JideOptionPane.dir</fail>
+        <fail unless="build.dir">Must set build.dir</fail>
+        <fail unless="dist.dir">Must set dist.dir</fail>
+        <fail unless="build.classes.dir">Must set build.classes.dir</fail>
+        <fail unless="dist.javadoc.dir">Must set dist.javadoc.dir</fail>
+        <fail unless="build.test.classes.dir">Must set build.test.classes.dir</fail>
+        <fail unless="build.test.results.dir">Must set build.test.results.dir</fail>
+        <fail unless="build.classes.excludes">Must set build.classes.excludes</fail>
+        <fail unless="dist.jar">Must set dist.jar</fail>
+    </target>
+    <target name="-init-macrodef-property">
+        <macrodef name="property" uri="http://www.netbeans.org/ns/j2se-project/1">
+            <attribute name="name"/>
+            <attribute name="value"/>
+            <sequential>
+                <property name="@{name}" value="${@{value}}"/>
+            </sequential>
+        </macrodef>
+    </target>
+    <target depends="-init-ap-cmdline-properties" if="ap.supported.internal"
+            name="-init-macrodef-javac-with-processors">
+        <macrodef name="javac" uri="http://www.netbeans.org/ns/j2se-project/3">
+            <attribute
+                    default="${src.dir}:${A2.SampleVsnet.dir}:${A4.ThreeActionFramework.dir}:${B1.Layouts.dir}:${B10.CheckBoxList.dir}:${B11.AutosizingTextArea.dir}:${B12.IndeterminateProgressBar.dir}:${B13.AutoCompletion.dir}:${B14.IntelliHints.dir}:${B15.StyledLabel.dir}:${B16.CheckBoxTree.dir}:${B17.RangeSlider.dir}:${B18.FolderChooser.dir}:${B19.Overlayable.dir}:${B2.IconsFactory.dir}:${B20.TitledSeparator.dir}:${B21.MarqueePane.dir}:${B3.Borders.dir}:${B4.JideButton.dir}:${B5.JideSplitPane.dir}:${B6.JideTabbedPane.dir}:${B7.SearchableComponents.dir}:${B8.JideScrollPane.dir}:${B9.Popup.dir}:${C1.DocumentPane.dir}:${C2.StatusBar.dir}:${C3.CollapsiblePane.dir}:${C4.FloorTabbedPane.dir}:${C6.Alert.dir}:${C7.Tip.dir}:${C8.BreadcrumbBar.dir}:${C9.NavigationComponent.dir}:${D1.DockingFramework.dir}:${D2.TwoDockingFramework.dir}:${D3.InitialLayoutDockingFramework.dir}:${Demo.dir}:${E1.CodeEditor.dir}:${F1.FeedReader.dir}:${G1.PropertyPane.dir}:${G10.TableScrollPane.dir}:${G11.TableSplitPane.dir}:${G12.JideTable.dir}:${G13.DirectionChooserDemo.dir}:${G14.Converter.dir}:${G15.QuickFilter.dir}:${G16.SpanTable.dir}:${G17.StyleTable.dir}:${G18.TreeTable.dir}:${G19.SortableList.dir}:${G2.SortableTable.dir}:${G20.SortableTree.dir}:${G21.Spinners.dir}:${G22.ImagePreviewList.dir}:${G23.TextFields.dir}:${G24.Calculator.dir}:${G25.CachedTableModel.dir}:${G26.ContextSensitiveTable.dir}:${G27.TableHeader.dir}:${G28.GroupTable.dir}:${G29.BeanTableModel.dir}:${G3.LargeSortableTable.dir}:${G30.GroupList.dir}:${G31.DualList.dir}:${G32.NavigableTable.dir}:${G33.CustomFilterEditor.dir}:${G34.CellStyleEditor.dir}:${G35.ShrinkSearchableSupport.dir}:${G36.TransposeTableModel.dir}:${G37.MarkerMargin.dir}:${G4.ComboBoxes.dir}:${G5.DateComboBoxes.dir}:${G6.ColorComboBoxes.dir}:${G7.FilterableTable.dir}:${G8.HierarchicalTable.dir}:${G9.TableUtilsDemo.dir}:${H1.Dashboard.dir}:${I1.Diff.dir}:${N1.Gantt.dir}:${P1.PivotTablePane.dir}:${P2.CalculatedTableModel.dir}:${P3.AggregateTable.dir}:${R1.Charts.dir}:${S1.ShortcutEditor.dir}:${T1.NavigationBar.dir}:${T2.DatabaseTableModel.dir}:${T3.HibernateTableModel.dir}:${W1.Wizard.dir}:${W2.OptionsDialog.dir}:${W3.TipsOfTheDay.dir}:${W4.ButtonPanel.dir}:${W5.BannerPanel.dir}:${W6.StandardDialog.dir}:${W7.JideOptionPane.dir}"
+                    name="srcdir"/>
+            <attribute default="${build.classes.dir}" name="destdir"/>
+            <attribute default="${javac.classpath}" name="classpath"/>
+            <attribute default="${javac.processorpath}" name="processorpath"/>
+            <attribute default="${build.generated.sources.dir}/ap-source-output" name="apgeneratedsrcdir"/>
+            <attribute default="${includes}" name="includes"/>
+            <attribute default="${excludes}" name="excludes"/>
+            <attribute default="${javac.debug}" name="debug"/>
+            <attribute default="${empty.dir}" name="sourcepath"/>
+            <attribute default="${empty.dir}" name="gensrcdir"/>
+            <element name="customize" optional="true"/>
+            <sequential>
+                <property location="${build.dir}/empty" name="empty.dir"/>
+                <mkdir dir="${empty.dir}"/>
+                <mkdir dir="@{apgeneratedsrcdir}"/>
+                <javac debug="@{debug}" deprecation="${javac.deprecation}" destdir="@{destdir}"
+                       encoding="${source.encoding}" excludes="@{excludes}" executable="${platform.javac}" fork="yes"
+                       includeantruntime="false" includes="@{includes}" source="${javac.source}"
+                       sourcepath="@{sourcepath}" srcdir="@{srcdir}" target="${javac.target}"
+                       tempdir="${java.io.tmpdir}">
+                    <src>
+                        <dirset dir="@{gensrcdir}" erroronmissingdir="false">
+                            <include name="*"/>
+                        </dirset>
+                    </src>
+                    <classpath>
+                        <path path="@{classpath}"/>
+                    </classpath>
+                    <compilerarg line="${endorsed.classpath.cmd.line.arg}"/>
+                    <compilerarg line="${javac.compilerargs}"/>
+                    <compilerarg value="-processorpath"/>
+                    <compilerarg path="@{processorpath}:${empty.dir}"/>
+                    <compilerarg line="${ap.processors.internal}"/>
+                    <compilerarg line="${annotation.processing.processor.options}"/>
+                    <compilerarg value="-s"/>
+                    <compilerarg path="@{apgeneratedsrcdir}"/>
+                    <compilerarg line="${ap.proc.none.internal}"/>
+                    <customize/>
+                </javac>
+            </sequential>
+        </macrodef>
+    </target>
+    <target depends="-init-ap-cmdline-properties" name="-init-macrodef-javac-without-processors"
+            unless="ap.supported.internal">
+        <macrodef name="javac" uri="http://www.netbeans.org/ns/j2se-project/3">
+            <attribute
+                    default="${src.dir}:${A2.SampleVsnet.dir}:${A4.ThreeActionFramework.dir}:${B1.Layouts.dir}:${B10.CheckBoxList.dir}:${B11.AutosizingTextArea.dir}:${B12.IndeterminateProgressBar.dir}:${B13.AutoCompletion.dir}:${B14.IntelliHints.dir}:${B15.StyledLabel.dir}:${B16.CheckBoxTree.dir}:${B17.RangeSlider.dir}:${B18.FolderChooser.dir}:${B19.Overlayable.dir}:${B2.IconsFactory.dir}:${B20.TitledSeparator.dir}:${B21.MarqueePane.dir}:${B3.Borders.dir}:${B4.JideButton.dir}:${B5.JideSplitPane.dir}:${B6.JideTabbedPane.dir}:${B7.SearchableComponents.dir}:${B8.JideScrollPane.dir}:${B9.Popup.dir}:${C1.DocumentPane.dir}:${C2.StatusBar.dir}:${C3.CollapsiblePane.dir}:${C4.FloorTabbedPane.dir}:${C6.Alert.dir}:${C7.Tip.dir}:${C8.BreadcrumbBar.dir}:${C9.NavigationComponent.dir}:${D1.DockingFramework.dir}:${D2.TwoDockingFramework.dir}:${D3.InitialLayoutDockingFramework.dir}:${Demo.dir}:${E1.CodeEditor.dir}:${F1.FeedReader.dir}:${G1.PropertyPane.dir}:${G10.TableScrollPane.dir}:${G11.TableSplitPane.dir}:${G12.JideTable.dir}:${G13.DirectionChooserDemo.dir}:${G14.Converter.dir}:${G15.QuickFilter.dir}:${G16.SpanTable.dir}:${G17.StyleTable.dir}:${G18.TreeTable.dir}:${G19.SortableList.dir}:${G2.SortableTable.dir}:${G20.SortableTree.dir}:${G21.Spinners.dir}:${G22.ImagePreviewList.dir}:${G23.TextFields.dir}:${G24.Calculator.dir}:${G25.CachedTableModel.dir}:${G26.ContextSensitiveTable.dir}:${G27.TableHeader.dir}:${G28.GroupTable.dir}:${G29.BeanTableModel.dir}:${G3.LargeSortableTable.dir}:${G30.GroupList.dir}:${G31.DualList.dir}:${G32.NavigableTable.dir}:${G33.CustomFilterEditor.dir}:${G34.CellStyleEditor.dir}:${G35.ShrinkSearchableSupport.dir}:${G36.TransposeTableModel.dir}:${G37.MarkerMargin.dir}:${G4.ComboBoxes.dir}:${G5.DateComboBoxes.dir}:${G6.ColorComboBoxes.dir}:${G7.FilterableTable.dir}:${G8.HierarchicalTable.dir}:${G9.TableUtilsDemo.dir}:${H1.Dashboard.dir}:${I1.Diff.dir}:${N1.Gantt.dir}:${P1.PivotTablePane.dir}:${P2.CalculatedTableModel.dir}:${P3.AggregateTable.dir}:${R1.Charts.dir}:${S1.ShortcutEditor.dir}:${T1.NavigationBar.dir}:${T2.DatabaseTableModel.dir}:${T3.HibernateTableModel.dir}:${W1.Wizard.dir}:${W2.OptionsDialog.dir}:${W3.TipsOfTheDay.dir}:${W4.ButtonPanel.dir}:${W5.BannerPanel.dir}:${W6.StandardDialog.dir}:${W7.JideOptionPane.dir}"
+                    name="srcdir"/>
+            <attribute default="${build.classes.dir}" name="destdir"/>
+            <attribute default="${javac.classpath}" name="classpath"/>
+            <attribute default="${javac.processorpath}" name="processorpath"/>
+            <attribute default="${build.generated.sources.dir}/ap-source-output" name="apgeneratedsrcdir"/>
+            <attribute default="${includes}" name="includes"/>
+            <attribute default="${excludes}" name="excludes"/>
+            <attribute default="${javac.debug}" name="debug"/>
+            <attribute default="${empty.dir}" name="sourcepath"/>
+            <attribute default="${empty.dir}" name="gensrcdir"/>
+            <element name="customize" optional="true"/>
+            <sequential>
+                <property location="${build.dir}/empty" name="empty.dir"/>
+                <mkdir dir="${empty.dir}"/>
+                <javac debug="@{debug}" deprecation="${javac.deprecation}" destdir="@{destdir}"
+                       encoding="${source.encoding}" excludes="@{excludes}" executable="${platform.javac}" fork="yes"
+                       includeantruntime="false" includes="@{includes}" source="${javac.source}"
+                       sourcepath="@{sourcepath}" srcdir="@{srcdir}" target="${javac.target}"
+                       tempdir="${java.io.tmpdir}">
+                    <src>
+                        <dirset dir="@{gensrcdir}" erroronmissingdir="false">
+                            <include name="*"/>
+                        </dirset>
+                    </src>
+                    <classpath>
+                        <path path="@{classpath}"/>
+                    </classpath>
+                    <compilerarg line="${endorsed.classpath.cmd.line.arg}"/>
+                    <compilerarg line="${javac.compilerargs}"/>
+                    <customize/>
+                </javac>
+            </sequential>
+        </macrodef>
+    </target>
+    <target depends="-init-macrodef-javac-with-processors,-init-macrodef-javac-without-processors"
+            name="-init-macrodef-javac">
+        <macrodef name="depend" uri="http://www.netbeans.org/ns/j2se-project/3">
+            <attribute
+                    default="${src.dir}:${A2.SampleVsnet.dir}:${A4.ThreeActionFramework.dir}:${B1.Layouts.dir}:${B10.CheckBoxList.dir}:${B11.AutosizingTextArea.dir}:${B12.IndeterminateProgressBar.dir}:${B13.AutoCompletion.dir}:${B14.IntelliHints.dir}:${B15.StyledLabel.dir}:${B16.CheckBoxTree.dir}:${B17.RangeSlider.dir}:${B18.FolderChooser.dir}:${B19.Overlayable.dir}:${B2.IconsFactory.dir}:${B20.TitledSeparator.dir}:${B21.MarqueePane.dir}:${B3.Borders.dir}:${B4.JideButton.dir}:${B5.JideSplitPane.dir}:${B6.JideTabbedPane.dir}:${B7.SearchableComponents.dir}:${B8.JideScrollPane.dir}:${B9.Popup.dir}:${C1.DocumentPane.dir}:${C2.StatusBar.dir}:${C3.CollapsiblePane.dir}:${C4.FloorTabbedPane.dir}:${C6.Alert.dir}:${C7.Tip.dir}:${C8.BreadcrumbBar.dir}:${C9.NavigationComponent.dir}:${D1.DockingFramework.dir}:${D2.TwoDockingFramework.dir}:${D3.InitialLayoutDockingFramework.dir}:${Demo.dir}:${E1.CodeEditor.dir}:${F1.FeedReader.dir}:${G1.PropertyPane.dir}:${G10.TableScrollPane.dir}:${G11.TableSplitPane.dir}:${G12.JideTable.dir}:${G13.DirectionChooserDemo.dir}:${G14.Converter.dir}:${G15.QuickFilter.dir}:${G16.SpanTable.dir}:${G17.StyleTable.dir}:${G18.TreeTable.dir}:${G19.SortableList.dir}:${G2.SortableTable.dir}:${G20.SortableTree.dir}:${G21.Spinners.dir}:${G22.ImagePreviewList.dir}:${G23.TextFields.dir}:${G24.Calculator.dir}:${G25.CachedTableModel.dir}:${G26.ContextSensitiveTable.dir}:${G27.TableHeader.dir}:${G28.GroupTable.dir}:${G29.BeanTableModel.dir}:${G3.LargeSortableTable.dir}:${G30.GroupList.dir}:${G31.DualList.dir}:${G32.NavigableTable.dir}:${G33.CustomFilterEditor.dir}:${G34.CellStyleEditor.dir}:${G35.ShrinkSearchableSupport.dir}:${G36.TransposeTableModel.dir}:${G37.MarkerMargin.dir}:${G4.ComboBoxes.dir}:${G5.DateComboBoxes.dir}:${G6.ColorComboBoxes.dir}:${G7.FilterableTable.dir}:${G8.HierarchicalTable.dir}:${G9.TableUtilsDemo.dir}:${H1.Dashboard.dir}:${I1.Diff.dir}:${N1.Gantt.dir}:${P1.PivotTablePane.dir}:${P2.CalculatedTableModel.dir}:${P3.AggregateTable.dir}:${R1.Charts.dir}:${S1.ShortcutEditor.dir}:${T1.NavigationBar.dir}:${T2.DatabaseTableModel.dir}:${T3.HibernateTableModel.dir}:${W1.Wizard.dir}:${W2.OptionsDialog.dir}:${W3.TipsOfTheDay.dir}:${W4.ButtonPanel.dir}:${W5.BannerPanel.dir}:${W6.StandardDialog.dir}:${W7.JideOptionPane.dir}"
+                    name="srcdir"/>
+            <attribute default="${build.classes.dir}" name="destdir"/>
+            <attribute default="${javac.classpath}" name="classpath"/>
+            <sequential>
+                <depend cache="${build.dir}/depcache" destdir="@{destdir}" excludes="${excludes}" includes="${includes}"
+                        srcdir="@{srcdir}">
+                    <classpath>
+                        <path path="@{classpath}"/>
+                    </classpath>
+                </depend>
+            </sequential>
+        </macrodef>
+        <macrodef name="force-recompile" uri="http://www.netbeans.org/ns/j2se-project/3">
+            <attribute default="${build.classes.dir}" name="destdir"/>
+            <sequential>
+                <fail unless="javac.includes">Must set javac.includes</fail>
+                <pathconvert pathsep="${line.separator}" property="javac.includes.binary">
+                    <path>
+                        <filelist dir="@{destdir}" files="${javac.includes}"/>
+                    </path>
+                    <globmapper from="*.java" to="*.class"/>
+                </pathconvert>
+                <tempfile deleteonexit="true" property="javac.includesfile.binary"/>
+                <echo file="${javac.includesfile.binary}" message="${javac.includes.binary}"/>
+                <delete>
+                    <files includesfile="${javac.includesfile.binary}"/>
+                </delete>
+                <delete>
+                    <fileset file="${javac.includesfile.binary}"/>
+                </delete>
+            </sequential>
+        </macrodef>
+    </target>
+    <target name="-init-macrodef-junit">
+        <macrodef name="junit" uri="http://www.netbeans.org/ns/j2se-project/3">
+            <attribute default="${includes}" name="includes"/>
+            <attribute default="${excludes}" name="excludes"/>
+            <attribute default="**" name="testincludes"/>
+            <sequential>
+                <property name="junit.forkmode" value="perTest"/>
+                <junit dir="${work.dir}" errorproperty="tests.failed" failureproperty="tests.failed" fork="true"
+                       forkmode="${junit.forkmode}" jvm="${platform.java}" showoutput="true" tempdir="${build.dir}">
+                    <batchtest todir="${build.test.results.dir}"/>
+                    <classpath>
+                        <path path="${run.test.classpath}"/>
+                    </classpath>
+                    <syspropertyset>
+                        <propertyref prefix="test-sys-prop."/>
+                        <mapper from="test-sys-prop.*" to="*" type="glob"/>
+                    </syspropertyset>
+                    <formatter type="brief" usefile="false"/>
+                    <formatter type="xml"/>
+                    <jvmarg line="${endorsed.classpath.cmd.line.arg}"/>
+                    <jvmarg value="-ea"/>
+                    <jvmarg line="${run.jvmargs}"/>
+                </junit>
+            </sequential>
+        </macrodef>
+    </target>
+    <target depends="-profile-pre-init, init, -profile-post-init, -profile-init-macrodef-profile, -profile-init-check"
+            name="profile-init"/>
+    <target name="-profile-pre-init">
+        <!-- Empty placeholder for easier customization. -->
+        <!-- You can override this target in the ../build.xml file. -->
+    </target>
+    <target name="-profile-post-init">
+        <!-- Empty placeholder for easier customization. -->
+        <!-- You can override this target in the ../build.xml file. -->
+    </target>
+    <target name="-profile-init-macrodef-profile">
+        <macrodef name="resolve">
+            <attribute name="name"/>
+            <attribute name="value"/>
+            <sequential>
+                <property name="@{name}" value="${env.@{value}}"/>
+            </sequential>
+        </macrodef>
+        <macrodef name="profile">
+            <attribute default="${main.class}" name="classname"/>
+            <element name="customize" optional="true"/>
+            <sequential>
+                <property environment="env"/>
+                <resolve name="profiler.current.path" value="${profiler.info.pathvar}"/>
+                <java classname="@{classname}" dir="${profiler.info.dir}" fork="true" jvm="${profiler.info.jvm}">
+                    <jvmarg line="${endorsed.classpath.cmd.line.arg}"/>
+                    <jvmarg value="${profiler.info.jvmargs.agent}"/>
+                    <jvmarg line="${profiler.info.jvmargs}"/>
+                    <env key="${profiler.info.pathvar}" path="${profiler.info.agentpath}:${profiler.current.path}"/>
+                    <arg line="${application.args}"/>
+                    <classpath>
+                        <path path="${run.classpath}"/>
+                    </classpath>
+                    <syspropertyset>
+                        <propertyref prefix="run-sys-prop."/>
+                        <mapper from="run-sys-prop.*" to="*" type="glob"/>
+                    </syspropertyset>
+                    <customize/>
+                </java>
+            </sequential>
+        </macrodef>
+    </target>
+    <target depends="-profile-pre-init, init, -profile-post-init, -profile-init-macrodef-profile"
+            name="-profile-init-check">
+        <fail unless="profiler.info.jvm">Must set JVM to use for profiling in profiler.info.jvm</fail>
+        <fail unless="profiler.info.jvmargs.agent">Must set profiler agent JVM arguments in
+            profiler.info.jvmargs.agent
+        </fail>
+    </target>
+    <target depends="-init-debug-args" name="-init-macrodef-nbjpda">
+        <macrodef name="nbjpdastart" uri="http://www.netbeans.org/ns/j2se-project/1">
+            <attribute default="${main.class}" name="name"/>
+            <attribute default="${debug.classpath}" name="classpath"/>
+            <attribute default="" name="stopclassname"/>
+            <sequential>
+                <nbjpdastart addressproperty="jpda.address" name="@{name}" stopclassname="@{stopclassname}"
+                             transport="${debug-transport}">
+                    <classpath>
+                        <path path="@{classpath}"/>
+                    </classpath>
+                    <bootclasspath>
+                        <path path="${platform.bootcp}"/>
+                    </bootclasspath>
+                </nbjpdastart>
+            </sequential>
+        </macrodef>
+        <macrodef name="nbjpdareload" uri="http://www.netbeans.org/ns/j2se-project/1">
+            <attribute default="${build.classes.dir}" name="dir"/>
+            <sequential>
+                <nbjpdareload>
+                    <fileset dir="@{dir}" includes="${fix.classes}">
+                        <include name="${fix.includes}*.class"/>
+                    </fileset>
+                </nbjpdareload>
+            </sequential>
+        </macrodef>
+    </target>
+    <target name="-init-debug-args">
+        <exec executable="${platform.java}" outputproperty="version-output">
+            <arg value="-version"/>
+        </exec>
+        <condition property="have-jdk-older-than-1.4">
+            <or>
+                <contains string="${version-output}" substring="java version &quot;1.0"/>
+                <contains string="${version-output}" substring="java version &quot;1.1"/>
+                <contains string="${version-output}" substring="java version &quot;1.2"/>
+                <contains string="${version-output}" substring="java version &quot;1.3"/>
+            </or>
+        </condition>
+        <condition else="-Xdebug" property="debug-args-line" value="-Xdebug -Xnoagent -Djava.compiler=none">
+            <istrue value="${have-jdk-older-than-1.4}"/>
+        </condition>
+        <condition else="dt_socket" property="debug-transport-by-os" value="dt_shmem">
+            <os family="windows"/>
+        </condition>
+        <condition else="${debug-transport-by-os}" property="debug-transport" value="${debug.transport}">
+            <isset property="debug.transport"/>
+        </condition>
+    </target>
+    <target depends="-init-debug-args" name="-init-macrodef-debug">
+        <macrodef name="debug" uri="http://www.netbeans.org/ns/j2se-project/3">
+            <attribute default="${main.class}" name="classname"/>
+            <attribute default="${debug.classpath}" name="classpath"/>
+            <element name="customize" optional="true"/>
+            <sequential>
+                <java classname="@{classname}" dir="${work.dir}" fork="true" jvm="${platform.java}">
+                    <jvmarg line="${endorsed.classpath.cmd.line.arg}"/>
+                    <jvmarg line="${debug-args-line}"/>
+                    <jvmarg value="-Xrunjdwp:transport=${debug-transport},address=${jpda.address}"/>
+                    <jvmarg value="-Dfile.encoding=${runtime.encoding}"/>
+                    <redirector errorencoding="${runtime.encoding}" inputencoding="${runtime.encoding}"
+                                outputencoding="${runtime.encoding}"/>
+                    <jvmarg line="${run.jvmargs}"/>
+                    <classpath>
+                        <path path="@{classpath}"/>
+                    </classpath>
+                    <syspropertyset>
+                        <propertyref prefix="run-sys-prop."/>
+                        <mapper from="run-sys-prop.*" to="*" type="glob"/>
+                    </syspropertyset>
+                    <customize/>
+                </java>
+            </sequential>
+        </macrodef>
+    </target>
+    <target name="-init-macrodef-java">
+        <macrodef name="java" uri="http://www.netbeans.org/ns/j2se-project/1">
+            <attribute default="${main.class}" name="classname"/>
+            <attribute default="${run.classpath}" name="classpath"/>
+            <element name="customize" optional="true"/>
+            <sequential>
+                <java classname="@{classname}" dir="${work.dir}" fork="true" jvm="${platform.java}">
+                    <jvmarg line="${endorsed.classpath.cmd.line.arg}"/>
+                    <jvmarg value="-Dfile.encoding=${runtime.encoding}"/>
+                    <redirector errorencoding="${runtime.encoding}" inputencoding="${runtime.encoding}"
+                                outputencoding="${runtime.encoding}"/>
+                    <jvmarg line="${run.jvmargs}"/>
+                    <classpath>
+                        <path path="@{classpath}"/>
+                    </classpath>
+                    <syspropertyset>
+                        <propertyref prefix="run-sys-prop."/>
+                        <mapper from="run-sys-prop.*" to="*" type="glob"/>
+                    </syspropertyset>
+                    <customize/>
+                </java>
+            </sequential>
+        </macrodef>
+    </target>
+    <target name="-init-macrodef-copylibs">
+        <macrodef name="copylibs" uri="http://www.netbeans.org/ns/j2se-project/3">
+            <attribute default="${manifest.file}" name="manifest"/>
+            <element name="customize" optional="true"/>
+            <sequential>
+                <property location="${build.classes.dir}" name="build.classes.dir.resolved"/>
+                <pathconvert property="run.classpath.without.build.classes.dir">
+                    <path path="${run.classpath}"/>
+                    <map from="${build.classes.dir.resolved}" to=""/>
+                </pathconvert>
+                <pathconvert pathsep=" " property="jar.classpath">
+                    <path path="${run.classpath.without.build.classes.dir}"/>
+                    <chainedmapper>
+                        <flattenmapper/>
+                        <globmapper from="*" to="lib/*"/>
+                    </chainedmapper>
+                </pathconvert>
+                <taskdef classname="org.netbeans.modules.java.j2seproject.copylibstask.CopyLibs"
+                         classpath="${libs.CopyLibs.classpath}" name="copylibs"/>
+                <copylibs compress="${jar.compress}" index="${jar.index}" indexMetaInf="${jar.index.metainf}"
+                          jarfile="${dist.jar}" manifest="@{manifest}" rebase="${copylibs.rebase}"
+                          runtimeclasspath="${run.classpath.without.build.classes.dir}">
+                    <fileset dir="${build.classes.dir}"/>
+                    <manifest>
+                        <attribute name="Class-Path" value="${jar.classpath}"/>
+                        <customize/>
+                    </manifest>
+                </copylibs>
+            </sequential>
+        </macrodef>
+    </target>
+    <target name="-init-presetdef-jar">
+        <presetdef name="jar" uri="http://www.netbeans.org/ns/j2se-project/1">
+            <jar compress="${jar.compress}" index="${jar.index}" jarfile="${dist.jar}">
+                <j2seproject1:fileset dir="${build.classes.dir}"/>
+            </jar>
+        </presetdef>
+    </target>
+    <target name="-init-ap-cmdline-properties">
+        <property name="annotation.processing.enabled" value="true"/>
+        <property name="annotation.processing.processors.list" value=""/>
+        <property name="annotation.processing.processor.options" value=""/>
+        <property name="annotation.processing.run.all.processors" value="true"/>
+        <property name="javac.processorpath" value="${javac.classpath}"/>
+        <property name="javac.test.processorpath" value="${javac.test.classpath}"/>
+        <condition property="ap.supported.internal" value="true">
+            <not>
+                <matches pattern="1\.[0-5](\..*)?" string="${javac.source}"/>
+            </not>
+        </condition>
+    </target>
+    <target depends="-init-ap-cmdline-properties" if="ap.supported.internal" name="-init-ap-cmdline-supported">
+        <condition else="" property="ap.processors.internal"
+                   value="-processor ${annotation.processing.processors.list}">
+            <isfalse value="${annotation.processing.run.all.processors}"/>
+        </condition>
+        <condition else="" property="ap.proc.none.internal" value="-proc:none">
+            <isfalse value="${annotation.processing.enabled}"/>
+        </condition>
+    </target>
+    <target depends="-init-ap-cmdline-properties,-init-ap-cmdline-supported" name="-init-ap-cmdline">
+        <property name="ap.cmd.line.internal" value=""/>
+    </target>
+    <target depends="-pre-init,-init-private,-init-libraries,-init-user,-init-project,-do-init,-post-init,-init-check,-init-macrodef-property,-init-macrodef-javac,-init-macrodef-junit,-init-macrodef-nbjpda,-init-macrodef-debug,-init-macrodef-java,-init-presetdef-jar,-init-ap-cmdline"
+            name="init"/>
+    <!--
+                ===================
+                COMPILATION SECTION
+                ===================
+            -->
+    <target name="-deps-jar-init" unless="built-jar.properties">
+        <property location="${build.dir}/built-jar.properties" name="built-jar.properties"/>
+        <delete file="${built-jar.properties}" quiet="true"/>
+    </target>
+    <target if="already.built.jar.${basedir}" name="-warn-already-built-jar">
+        <echo level="warn" message="Cycle detected: JideDemos was already built"/>
+    </target>
+    <target depends="init,-deps-jar-init" name="deps-jar" unless="no.deps">
+        <mkdir dir="${build.dir}"/>
+        <touch file="${built-jar.properties}" verbose="false"/>
+        <property file="${built-jar.properties}" prefix="already.built.jar."/>
+        <antcall target="-warn-already-built-jar"/>
+        <propertyfile file="${built-jar.properties}">
+            <entry key="${basedir}" value=""/>
+        </propertyfile>
+    </target>
+    <target depends="init,-check-automatic-build,-clean-after-automatic-build" name="-verify-automatic-build"/>
+    <target depends="init" name="-check-automatic-build">
+        <available file="${build.classes.dir}/.netbeans_automatic_build" property="netbeans.automatic.build"/>
+    </target>
+    <target depends="init" if="netbeans.automatic.build" name="-clean-after-automatic-build">
+        <antcall target="clean"/>
+    </target>
+    <target depends="init,deps-jar" name="-pre-pre-compile">
+        <mkdir dir="${build.classes.dir}"/>
+    </target>
+    <target name="-pre-compile">
+        <!-- Empty placeholder for easier customization. -->
+        <!-- You can override this target in the ../build.xml file. -->
+    </target>
+    <target if="do.depend.true" name="-compile-depend">
+        <pathconvert property="build.generated.subdirs">
+            <dirset dir="${build.generated.sources.dir}" erroronmissingdir="false">
+                <include name="*"/>
+            </dirset>
+        </pathconvert>
+        <j2seproject3:depend
+                srcdir="${src.dir}:${A2.SampleVsnet.dir}:${A4.ThreeActionFramework.dir}:${B1.Layouts.dir}:${B10.CheckBoxList.dir}:${B11.AutosizingTextArea.dir}:${B12.IndeterminateProgressBar.dir}:${B13.AutoCompletion.dir}:${B14.IntelliHints.dir}:${B15.StyledLabel.dir}:${B16.CheckBoxTree.dir}:${B17.RangeSlider.dir}:${B18.FolderChooser.dir}:${B19.Overlayable.dir}:${B2.IconsFactory.dir}:${B20.TitledSeparator.dir}:${B21.MarqueePane.dir}:${B3.Borders.dir}:${B4.JideButton.dir}:${B5.JideSplitPane.dir}:${B6.JideTabbedPane.dir}:${B7.SearchableComponents.dir}:${B8.JideScrollPane.dir}:${B9.Popup.dir}:${C1.DocumentPane.dir}:${C2.StatusBar.dir}:${C3.CollapsiblePane.dir}:${C4.FloorTabbedPane.dir}:${C6.Alert.dir}:${C7.Tip.dir}:${C8.BreadcrumbBar.dir}:${C9.NavigationComponent.dir}:${D1.DockingFramework.dir}:${D2.TwoDockingFramework.dir}:${D3.InitialLayoutDockingFramework.dir}:${Demo.dir}:${E1.CodeEditor.dir}:${F1.FeedReader.dir}:${G1.PropertyPane.dir}:${G10.TableScrollPane.dir}:${G11.TableSplitPane.dir}:${G12.JideTable.dir}:${G13.DirectionChooserDemo.dir}:${G14.Converter.dir}:${G15.QuickFilter.dir}:${G16.SpanTable.dir}:${G17.StyleTable.dir}:${G18.TreeTable.dir}:${G19.SortableList.dir}:${G2.SortableTable.dir}:${G20.SortableTree.dir}:${G21.Spinners.dir}:${G22.ImagePreviewList.dir}:${G23.TextFields.dir}:${G24.Calculator.dir}:${G25.CachedTableModel.dir}:${G26.ContextSensitiveTable.dir}:${G27.TableHeader.dir}:${G28.GroupTable.dir}:${G29.BeanTableModel.dir}:${G3.LargeSortableTable.dir}:${G30.GroupList.dir}:${G31.DualList.dir}:${G32.NavigableTable.dir}:${G33.CustomFilterEditor.dir}:${G34.CellStyleEditor.dir}:${G35.ShrinkSearchableSupport.dir}:${G36.TransposeTableModel.dir}:${G37.MarkerMargin.dir}:${G4.ComboBoxes.dir}:${G5.DateComboBoxes.dir}:${G6.ColorComboBoxes.dir}:${G7.FilterableTable.dir}:${G8.HierarchicalTable.dir}:${G9.TableUtilsDemo.dir}:${H1.Dashboard.dir}:${I1.Diff.dir}:${N1.Gantt.dir}:${P1.PivotTablePane.dir}:${P2.CalculatedTableModel.dir}:${P3.AggregateTable.dir}:${R1.Charts.dir}:${S1.ShortcutEditor.dir}:${T1.NavigationBar.dir}:${T2.DatabaseTableModel.dir}:${T3.HibernateTableModel.dir}:${W1.Wizard.dir}:${W2.OptionsDialog.dir}:${W3.TipsOfTheDay.dir}:${W4.ButtonPanel.dir}:${W5.BannerPanel.dir}:${W6.StandardDialog.dir}:${W7.JideOptionPane.dir}:${build.generated.subdirs}"/>
+    </target>
+    <target depends="init,deps-jar,-pre-pre-compile,-pre-compile, -copy-persistence-xml,-compile-depend"
+            if="have.sources" name="-do-compile">
+        <j2seproject3:javac gensrcdir="${build.generated.sources.dir}"/>
+        <copy todir="${build.classes.dir}">
+            <fileset dir="${src.dir}" excludes="${build.classes.excludes},${excludes}" includes="${includes}"/>
+            <fileset dir="${A2.SampleVsnet.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${A4.ThreeActionFramework.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${B1.Layouts.dir}" excludes="${build.classes.excludes},${excludes}" includes="${includes}"/>
+            <fileset dir="${B10.CheckBoxList.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${B11.AutosizingTextArea.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${B12.IndeterminateProgressBar.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${B13.AutoCompletion.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${B14.IntelliHints.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${B15.StyledLabel.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${B16.CheckBoxTree.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${B17.RangeSlider.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${B18.FolderChooser.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${B19.Overlayable.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${B2.IconsFactory.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${B20.TitledSeparator.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${B21.MarqueePane.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${B3.Borders.dir}" excludes="${build.classes.excludes},${excludes}" includes="${includes}"/>
+            <fileset dir="${B4.JideButton.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${B5.JideSplitPane.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${B6.JideTabbedPane.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${B7.SearchableComponents.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${B8.JideScrollPane.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${B9.Popup.dir}" excludes="${build.classes.excludes},${excludes}" includes="${includes}"/>
+            <fileset dir="${C1.DocumentPane.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${C2.StatusBar.dir}" excludes="${build.classes.excludes},${excludes}" includes="${includes}"/>
+            <fileset dir="${C3.CollapsiblePane.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${C4.FloorTabbedPane.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${C6.Alert.dir}" excludes="${build.classes.excludes},${excludes}" includes="${includes}"/>
+            <fileset dir="${C7.Tip.dir}" excludes="${build.classes.excludes},${excludes}" includes="${includes}"/>
+            <fileset dir="${C8.BreadcrumbBar.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${C9.NavigationComponent.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${D1.DockingFramework.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${D2.TwoDockingFramework.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${D3.InitialLayoutDockingFramework.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${Demo.dir}" excludes="${build.classes.excludes},${excludes}" includes="${includes}"/>
+            <fileset dir="${E1.CodeEditor.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${F1.FeedReader.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G1.PropertyPane.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G10.TableScrollPane.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G11.TableSplitPane.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G12.JideTable.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G13.DirectionChooserDemo.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G14.Converter.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G15.QuickFilter.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G16.SpanTable.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G17.StyleTable.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G18.TreeTable.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G19.SortableList.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G2.SortableTable.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G20.SortableTree.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G21.Spinners.dir}" excludes="${build.classes.excludes},${excludes}" includes="${includes}"/>
+            <fileset dir="${G22.ImagePreviewList.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G23.TextFields.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G24.Calculator.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G25.CachedTableModel.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G26.ContextSensitiveTable.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G27.TableHeader.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G28.GroupTable.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G29.BeanTableModel.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G3.LargeSortableTable.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G30.GroupList.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G31.DualList.dir}" excludes="${build.classes.excludes},${excludes}" includes="${includes}"/>
+            <fileset dir="${G32.NavigableTable.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G33.CustomFilterEditor.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G34.CellStyleEditor.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G35.ShrinkSearchableSupport.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G36.TransposeTableModel.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G37.MarkerMargin.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G4.ComboBoxes.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G5.DateComboBoxes.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G6.ColorComboBoxes.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G7.FilterableTable.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G8.HierarchicalTable.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${G9.TableUtilsDemo.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${H1.Dashboard.dir}" excludes="${build.classes.excludes},${excludes}" includes="${includes}"/>
+            <fileset dir="${I1.Diff.dir}" excludes="${build.classes.excludes},${excludes}" includes="${includes}"/>
+            <fileset dir="${N1.Gantt.dir}" excludes="${build.classes.excludes},${excludes}" includes="${includes}"/>
+            <fileset dir="${P1.PivotTablePane.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${P2.CalculatedTableModel.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${P3.AggregateTable.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${R1.Charts.dir}" excludes="${build.classes.excludes},${excludes}" includes="${includes}"/>
+            <fileset dir="${S1.ShortcutEditor.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${T1.NavigationBar.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${T2.DatabaseTableModel.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${T3.HibernateTableModel.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${W1.Wizard.dir}" excludes="${build.classes.excludes},${excludes}" includes="${includes}"/>
+            <fileset dir="${W2.OptionsDialog.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${W3.TipsOfTheDay.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${W4.ButtonPanel.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${W5.BannerPanel.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${W6.StandardDialog.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+            <fileset dir="${W7.JideOptionPane.dir}" excludes="${build.classes.excludes},${excludes}"
+                     includes="${includes}"/>
+        </copy>
+    </target>
+    <target if="has.persistence.xml" name="-copy-persistence-xml">
+        <mkdir dir="${build.classes.dir}/META-INF"/>
+        <copy todir="${build.classes.dir}/META-INF">
+            <fileset dir="${meta.inf.dir}" includes="persistence.xml"/>
+        </copy>
+    </target>
+    <target name="-post-compile">
+        <!-- Empty placeholder for easier customization. -->
+        <!-- You can override this target in the ../build.xml file. -->
+    </target>
+    <target depends="init,deps-jar,-verify-automatic-build,-pre-pre-compile,-pre-compile,-do-compile,-post-compile"
+            description="Compile project." name="compile"/>
+    <target name="-pre-compile-single">
+        <!-- Empty placeholder for easier customization. -->
+        <!-- You can override this target in the ../build.xml file. -->
+    </target>
+    <target depends="init,deps-jar,-pre-pre-compile" name="-do-compile-single">
+        <fail unless="javac.includes">Must select some files in the IDE or set javac.includes</fail>
+        <j2seproject3:force-recompile/>
+        <j2seproject3:javac excludes="" gensrcdir="${build.generated.sources.dir}" includes="${javac.includes}"
+                            sourcepath="${src.dir}:${A2.SampleVsnet.dir}:${A4.ThreeActionFramework.dir}:${B1.Layouts.dir}:${B10.CheckBoxList.dir}:${B11.AutosizingTextArea.dir}:${B12.IndeterminateProgressBar.dir}:${B13.AutoCompletion.dir}:${B14.IntelliHints.dir}:${B15.StyledLabel.dir}:${B16.CheckBoxTree.dir}:${B17.RangeSlider.dir}:${B18.FolderChooser.dir}:${B19.Overlayable.dir}:${B2.IconsFactory.dir}:${B20.TitledSeparator.dir}:${B21.MarqueePane.dir}:${B3.Borders.dir}:${B4.JideButton.dir}:${B5.JideSplitPane.dir}:${B6.JideTabbedPane.dir}:${B7.SearchableComponents.dir}:${B8.JideScrollPane.dir}:${B9.Popup.dir}:${C1.DocumentPane.dir}:${C2.StatusBar.dir}:${C3.CollapsiblePane.dir}:${C4.FloorTabbedPane.dir}:${C6.Alert.dir}:${C7.Tip.dir}:${C8.BreadcrumbBar.dir}:${C9.NavigationComponent.dir}:${D1.DockingFramework.dir}:${D2.TwoDockingFramework.dir}:${D3.InitialLayoutDockingFramework.dir}:${Demo.dir}:${E1.CodeEditor.dir}:${F1.FeedReader.dir}:${G1.PropertyPane.dir}:${G10.TableScrollPane.dir}:${G11.TableSplitPane.dir}:${G12.JideTable.dir}:${G13.DirectionChooserDemo.dir}:${G14.Converter.dir}:${G15.QuickFilter.dir}:${G16.SpanTable.dir}:${G17.StyleTable.dir}:${G18.TreeTable.dir}:${G19.SortableList.dir}:${G2.SortableTable.dir}:${G20.SortableTree.dir}:${G21.Spinners.dir}:${G22.ImagePreviewList.dir}:${G23.TextFields.dir}:${G24.Calculator.dir}:${G25.CachedTableModel.dir}:${G26.ContextSensitiveTable.dir}:${G27.TableHeader.dir}:${G28.GroupTable.dir}:${G29.BeanTableModel.dir}:${G3.LargeSortableTable.dir}:${G30.GroupList.dir}:${G31.DualList.dir}:${G32.NavigableTable.dir}:${G33.CustomFilterEditor.dir}:${G34.CellStyleEditor.dir}:${G35.ShrinkSearchableSupport.dir}:${G36.TransposeTableModel.dir}:${G37.MarkerMargin.dir}:${G4.ComboBoxes.dir}:${G5.DateComboBoxes.dir}:${G6.ColorComboBoxes.dir}:${G7.FilterableTable.dir}:${G8.HierarchicalTable.dir}:${G9.TableUtilsDemo.dir}:${H1.Dashboard.dir}:${I1.Diff.dir}:${N1.Gantt.dir}:${P1.PivotTablePane.dir}:${P2.CalculatedTableModel.dir}:${P3.AggregateTable.dir}:${R1.Charts.dir}:${S1.ShortcutEditor.dir}:${T1.NavigationBar.dir}:${T2.DatabaseTableModel.dir}:${T3.HibernateTableModel.dir}:${W1.Wizard.dir}:${W2.OptionsDialog.dir}:${W3.TipsOfTheDay.dir}:${W4.ButtonPanel.dir}:${W5.BannerPanel.dir}:${W6.StandardDialog.dir}:${W7.JideOptionPane.dir}"/>
+    </target>
+    <target name="-post-compile-single">
+        <!-- Empty placeholder for easier customization. -->
+        <!-- You can override this target in the ../build.xml file. -->
+    </target>
+    <target depends="init,deps-jar,-verify-automatic-build,-pre-pre-compile,-pre-compile-single,-do-compile-single,-post-compile-single"
+            name="compile-single"/>
+    <!--
+                ====================
+                JAR BUILDING SECTION
+                ====================
+            -->
+    <target depends="init" name="-pre-pre-jar">
+        <dirname file="${dist.jar}" property="dist.jar.dir"/>
+        <mkdir dir="${dist.jar.dir}"/>
+    </target>
+    <target name="-pre-jar">
+        <!-- Empty placeholder for easier customization. -->
+        <!-- You can override this target in the ../build.xml file. -->
+    </target>
+    <target depends="init,compile,-pre-pre-jar,-pre-jar" if="do.archive" name="-do-jar-without-manifest"
+            unless="manifest.available-mkdist.available">
+        <j2seproject1:jar/>
+    </target>
+    <target depends="init,compile,-pre-pre-jar,-pre-jar" if="do.archive+manifest.available" name="-do-jar-with-manifest"
+            unless="manifest.available+main.class-mkdist.available">
+        <j2seproject1:jar manifest="${manifest.file}"/>
+    </target>
+    <target depends="init,compile,-pre-pre-jar,-pre-jar" if="do.archive+manifest.available+main.class"
+            name="-do-jar-with-mainclass" unless="manifest.available+main.class+mkdist.available">
+        <j2seproject1:jar manifest="${manifest.file}">
+            <j2seproject1:manifest>
+                <j2seproject1:attribute name="Main-Class" value="${main.class}"/>
+            </j2seproject1:manifest>
+        </j2seproject1:jar>
+        <echo level="info">To run this application from the command line without Ant, try:</echo>
+        <property location="${build.classes.dir}" name="build.classes.dir.resolved"/>
+        <property location="${dist.jar}" name="dist.jar.resolved"/>
+        <pathconvert property="run.classpath.with.dist.jar">
+            <path path="${run.classpath}"/>
+            <map from="${build.classes.dir.resolved}" to="${dist.jar.resolved}"/>
+        </pathconvert>
+        <echo level="info">${platform.java} -cp "${run.classpath.with.dist.jar}" ${main.class}</echo>
+    </target>
+    <target depends="init" if="do.archive" name="-do-jar-with-libraries-create-manifest" unless="manifest.available">
+        <tempfile deleteonexit="true" destdir="${build.dir}" property="tmp.manifest.file"/>
+        <touch file="${tmp.manifest.file}" verbose="false"/>
+    </target>
+    <target depends="init" if="do.archive+manifest.available" name="-do-jar-with-libraries-copy-manifest">
+        <tempfile deleteonexit="true" destdir="${build.dir}" property="tmp.manifest.file"/>
+        <copy file="${manifest.file}" tofile="${tmp.manifest.file}"/>
+    </target>
+    <target depends="init,-do-jar-with-libraries-create-manifest,-do-jar-with-libraries-copy-manifest"
+            if="do.archive+main.class.available" name="-do-jar-with-libraries-set-main">
+        <manifest file="${tmp.manifest.file}" mode="update">
+            <attribute name="Main-Class" value="${main.class}"/>
+        </manifest>
+    </target>
+    <target depends="init,-do-jar-with-libraries-create-manifest,-do-jar-with-libraries-copy-manifest"
+            if="do.archive+splashscreen.available" name="-do-jar-with-libraries-set-splashscreen">
+        <basename file="${application.splash}" property="splashscreen.basename"/>
+        <mkdir dir="${build.classes.dir}/META-INF"/>
+        <copy failonerror="false" file="${application.splash}" todir="${build.classes.dir}/META-INF"/>
+        <manifest file="${tmp.manifest.file}" mode="update">
+            <attribute name="SplashScreen-Image" value="META-INF/${splashscreen.basename}"/>
+        </manifest>
+    </target>
+    <target depends="init,-init-macrodef-copylibs,compile,-pre-pre-jar,-pre-jar,-do-jar-with-libraries-create-manifest,-do-jar-with-libraries-copy-manifest,-do-jar-with-libraries-set-main,-do-jar-with-libraries-set-splashscreen"
+            if="do.mkdist" name="-do-jar-with-libraries-pack">
+        <j2seproject3:copylibs manifest="${tmp.manifest.file}"/>
+        <echo level="info">To run this application from the command line without Ant, try:</echo>
+        <property location="${dist.jar}" name="dist.jar.resolved"/>
+        <echo level="info">${platform.java} -jar "${dist.jar.resolved}"</echo>
+    </target>
+    <target depends="-do-jar-with-libraries-pack" if="do.archive" name="-do-jar-with-libraries-delete-manifest">
+        <delete>
+            <fileset file="${tmp.manifest.file}"/>
+        </delete>
+    </target>
+    <target depends="init,compile,-pre-pre-jar,-pre-jar,-do-jar-with-libraries-create-manifest,-do-jar-with-libraries-copy-manifest,-do-jar-with-libraries-set-main,-do-jar-with-libraries-set-splashscreen,-do-jar-with-libraries-pack,-do-jar-with-libraries-delete-manifest"
+            name="-do-jar-with-libraries"/>
+    <target name="-post-jar">
+        <!-- Empty placeholder for easier customization. -->
+        <!-- You can override this target in the ../build.xml file. -->
+    </target>
+    <target depends="init,compile,-pre-jar,-do-jar-with-manifest,-do-jar-without-manifest,-do-jar-with-mainclass,-do-jar-with-libraries,-post-jar"
+            description="Build JAR." name="jar"/>
+    <!--
+                =================
+                EXECUTION SECTION
+                =================
+            -->
+    <target depends="init,compile" description="Run a main class." name="run">
+        <j2seproject1:java>
+            <customize>
+                <arg line="${application.args}"/>
+            </customize>
+        </j2seproject1:java>
+    </target>
+    <target name="-do-not-recompile">
+        <property name="javac.includes.binary" value=""/>
+    </target>
+    <target depends="init,compile-single" name="run-single">
+        <fail unless="run.class">Must select one file in the IDE or set run.class</fail>
+        <j2seproject1:java classname="${run.class}"/>
+    </target>
+    <target depends="init,compile-test-single" name="run-test-with-main">
+        <fail unless="run.class">Must select one file in the IDE or set run.class</fail>
+        <j2seproject1:java classname="${run.class}" classpath="${run.test.classpath}"/>
+    </target>
+    <!--
+                =================
+                DEBUGGING SECTION
+                =================
+            -->
+    <target depends="init" if="netbeans.home" name="-debug-start-debugger">
+        <j2seproject1:nbjpdastart name="${debug.class}"/>
+    </target>
+    <target depends="init" if="netbeans.home" name="-debug-start-debugger-main-test">
+        <j2seproject1:nbjpdastart classpath="${debug.test.classpath}" name="${debug.class}"/>
+    </target>
+    <target depends="init,compile" name="-debug-start-debuggee">
+        <j2seproject3:debug>
+            <customize>
+                <arg line="${application.args}"/>
+            </customize>
+        </j2seproject3:debug>
+    </target>
+    <target depends="init,compile,-debug-start-debugger,-debug-start-debuggee" description="Debug project in IDE."
+            if="netbeans.home" name="debug"/>
+    <target depends="init" if="netbeans.home" name="-debug-start-debugger-stepinto">
+        <j2seproject1:nbjpdastart stopclassname="${main.class}"/>
+    </target>
+    <target depends="init,compile,-debug-start-debugger-stepinto,-debug-start-debuggee" if="netbeans.home"
+            name="debug-stepinto"/>
+    <target depends="init,compile-single" if="netbeans.home" name="-debug-start-debuggee-single">
+        <fail unless="debug.class">Must select one file in the IDE or set debug.class</fail>
+        <j2seproject3:debug classname="${debug.class}"/>
+    </target>
+    <target depends="init,compile-single,-debug-start-debugger,-debug-start-debuggee-single" if="netbeans.home"
+            name="debug-single"/>
+    <target depends="init,compile-test-single" if="netbeans.home" name="-debug-start-debuggee-main-test">
+        <fail unless="debug.class">Must select one file in the IDE or set debug.class</fail>
+        <j2seproject3:debug classname="${debug.class}" classpath="${debug.test.classpath}"/>
+    </target>
+    <target depends="init,compile-test-single,-debug-start-debugger-main-test,-debug-start-debuggee-main-test"
+            if="netbeans.home" name="debug-test-with-main"/>
+    <target depends="init" name="-pre-debug-fix">
+        <fail unless="fix.includes">Must set fix.includes</fail>
+        <property name="javac.includes" value="${fix.includes}.java"/>
+    </target>
+    <target depends="init,-pre-debug-fix,compile-single" if="netbeans.home" name="-do-debug-fix">
+        <j2seproject1:nbjpdareload/>
+    </target>
+    <target depends="init,-pre-debug-fix,-do-debug-fix" if="netbeans.home" name="debug-fix"/>
+    <!--
+                =================
+                PROFILING SECTION
+                =================
+            -->
+    <target depends="profile-init,compile" description="Profile a project in the IDE." if="netbeans.home"
+            name="profile">
+        <nbprofiledirect>
+            <classpath>
+                <path path="${run.classpath}"/>
+            </classpath>
+        </nbprofiledirect>
+        <profile/>
+    </target>
+    <target depends="profile-init,compile-single" description="Profile a selected class in the IDE." if="netbeans.home"
+            name="profile-single">
+        <fail unless="profile.class">Must select one file in the IDE or set profile.class</fail>
+        <nbprofiledirect>
+            <classpath>
+                <path path="${run.classpath}"/>
+            </classpath>
+        </nbprofiledirect>
+        <profile classname="${profile.class}"/>
+    </target>
+    <!--
+                =========================
+                APPLET PROFILING  SECTION
+                =========================
+            -->
+    <target depends="profile-init,compile-single" if="netbeans.home" name="profile-applet">
+        <nbprofiledirect>
+            <classpath>
+                <path path="${run.classpath}"/>
+            </classpath>
+        </nbprofiledirect>
+        <profile classname="sun.applet.AppletViewer">
+            <customize>
+                <arg value="${applet.url}"/>
+            </customize>
+        </profile>
+    </target>
+    <!--
+                =========================
+                TESTS PROFILING  SECTION
+                =========================
+            -->
+    <target depends="profile-init,compile-test-single" if="netbeans.home" name="profile-test-single">
+        <nbprofiledirect>
+            <classpath>
+                <path path="${run.test.classpath}"/>
+            </classpath>
+        </nbprofiledirect>
+        <junit dir="${profiler.info.dir}" errorproperty="tests.failed" failureproperty="tests.failed" fork="true"
+               jvm="${profiler.info.jvm}" showoutput="true">
+            <env key="${profiler.info.pathvar}" path="${profiler.info.agentpath}:${profiler.current.path}"/>
+            <jvmarg value="${profiler.info.jvmargs.agent}"/>
+            <jvmarg line="${profiler.info.jvmargs}"/>
+            <test name="${profile.class}"/>
+            <classpath>
+                <path path="${run.test.classpath}"/>
+            </classpath>
+            <syspropertyset>
+                <propertyref prefix="test-sys-prop."/>
+                <mapper from="test-sys-prop.*" to="*" type="glob"/>
+            </syspropertyset>
+            <formatter type="brief" usefile="false"/>
+            <formatter type="xml"/>
+        </junit>
+    </target>
+    <!--
+                ===============
+                JAVADOC SECTION
+                ===============
+            -->
+    <target depends="init" if="have.sources" name="-javadoc-build">
+        <mkdir dir="${dist.javadoc.dir}"/>
+        <condition else="" property="javadoc.endorsed.classpath.cmd.line.arg"
+                   value="-J${endorsed.classpath.cmd.line.arg}">
+            <and>
+                <isset property="endorsed.classpath.cmd.line.arg"/>
+                <not>
+                    <equals arg1="${endorsed.classpath.cmd.line.arg}" arg2=""/>
+                </not>
+            </and>
+        </condition>
+        <javadoc additionalparam="${javadoc.additionalparam}" author="${javadoc.author}" charset="UTF-8"
+                 destdir="${dist.javadoc.dir}" docencoding="UTF-8" encoding="${javadoc.encoding.used}"
+                 executable="${platform.javadoc}" failonerror="true" noindex="${javadoc.noindex}"
+                 nonavbar="${javadoc.nonavbar}" notree="${javadoc.notree}" private="${javadoc.private}"
+                 source="${javac.source}" splitindex="${javadoc.splitindex}" use="${javadoc.use}" useexternalfile="true"
+                 version="${javadoc.version}" windowtitle="${javadoc.windowtitle}">
+            <classpath>
+                <path path="${javac.classpath}"/>
+            </classpath>
+            <fileset dir="${src.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${A2.SampleVsnet.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${A4.ThreeActionFramework.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${B1.Layouts.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${B10.CheckBoxList.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${B11.AutosizingTextArea.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${B12.IndeterminateProgressBar.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${B13.AutoCompletion.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${B14.IntelliHints.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${B15.StyledLabel.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${B16.CheckBoxTree.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${B17.RangeSlider.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${B18.FolderChooser.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${B19.Overlayable.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${B2.IconsFactory.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${B20.TitledSeparator.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${B21.MarqueePane.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${B3.Borders.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${B4.JideButton.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${B5.JideSplitPane.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${B6.JideTabbedPane.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${B7.SearchableComponents.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${B8.JideScrollPane.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${B9.Popup.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${C1.DocumentPane.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${C2.StatusBar.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${C3.CollapsiblePane.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${C4.FloorTabbedPane.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${C6.Alert.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${C7.Tip.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${C8.BreadcrumbBar.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${C9.NavigationComponent.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${D1.DockingFramework.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${D2.TwoDockingFramework.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${D3.InitialLayoutDockingFramework.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${Demo.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${E1.CodeEditor.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${F1.FeedReader.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G1.PropertyPane.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G10.TableScrollPane.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G11.TableSplitPane.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G12.JideTable.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G13.DirectionChooserDemo.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G14.Converter.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G15.QuickFilter.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G16.SpanTable.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G17.StyleTable.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G18.TreeTable.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G19.SortableList.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G2.SortableTable.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G20.SortableTree.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G21.Spinners.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G22.ImagePreviewList.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G23.TextFields.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G24.Calculator.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G25.CachedTableModel.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G26.ContextSensitiveTable.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G27.TableHeader.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G28.GroupTable.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G29.BeanTableModel.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G3.LargeSortableTable.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G30.GroupList.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G31.DualList.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G32.NavigableTable.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G33.CustomFilterEditor.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G34.CellStyleEditor.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G35.ShrinkSearchableSupport.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G36.TransposeTableModel.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G37.MarkerMargin.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G4.ComboBoxes.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G5.DateComboBoxes.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G6.ColorComboBoxes.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G7.FilterableTable.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G8.HierarchicalTable.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${G9.TableUtilsDemo.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${H1.Dashboard.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${I1.Diff.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${N1.Gantt.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${P1.PivotTablePane.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${P2.CalculatedTableModel.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${P3.AggregateTable.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${R1.Charts.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${S1.ShortcutEditor.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${T1.NavigationBar.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${T2.DatabaseTableModel.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${T3.HibernateTableModel.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${W1.Wizard.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${W2.OptionsDialog.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${W3.TipsOfTheDay.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${W4.ButtonPanel.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${W5.BannerPanel.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${W6.StandardDialog.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${W7.JideOptionPane.dir}" excludes="*.java,${excludes}" includes="${includes}">
+                <filename name="**/*.java"/>
+            </fileset>
+            <fileset dir="${build.generated.sources.dir}" erroronmissingdir="false">
+                <include name="**/*.java"/>
+                <exclude name="*.java"/>
+            </fileset>
+            <arg line="${javadoc.endorsed.classpath.cmd.line.arg}"/>
+        </javadoc>
+        <copy todir="${dist.javadoc.dir}">
+            <fileset dir="${src.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${A2.SampleVsnet.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${A4.ThreeActionFramework.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${B1.Layouts.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${B10.CheckBoxList.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${B11.AutosizingTextArea.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${B12.IndeterminateProgressBar.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${B13.AutoCompletion.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${B14.IntelliHints.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${B15.StyledLabel.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${B16.CheckBoxTree.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${B17.RangeSlider.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${B18.FolderChooser.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${B19.Overlayable.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${B2.IconsFactory.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${B20.TitledSeparator.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${B21.MarqueePane.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${B3.Borders.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${B4.JideButton.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${B5.JideSplitPane.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${B6.JideTabbedPane.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${B7.SearchableComponents.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${B8.JideScrollPane.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${B9.Popup.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${C1.DocumentPane.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${C2.StatusBar.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${C3.CollapsiblePane.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${C4.FloorTabbedPane.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${C6.Alert.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${C7.Tip.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${C8.BreadcrumbBar.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${C9.NavigationComponent.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${D1.DockingFramework.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${D2.TwoDockingFramework.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${D3.InitialLayoutDockingFramework.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${Demo.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${E1.CodeEditor.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${F1.FeedReader.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G1.PropertyPane.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G10.TableScrollPane.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G11.TableSplitPane.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G12.JideTable.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G13.DirectionChooserDemo.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G14.Converter.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G15.QuickFilter.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G16.SpanTable.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G17.StyleTable.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G18.TreeTable.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G19.SortableList.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G2.SortableTable.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G20.SortableTree.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G21.Spinners.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G22.ImagePreviewList.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G23.TextFields.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G24.Calculator.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G25.CachedTableModel.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G26.ContextSensitiveTable.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G27.TableHeader.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G28.GroupTable.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G29.BeanTableModel.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G3.LargeSortableTable.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G30.GroupList.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G31.DualList.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G32.NavigableTable.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G33.CustomFilterEditor.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G34.CellStyleEditor.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G35.ShrinkSearchableSupport.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G36.TransposeTableModel.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G37.MarkerMargin.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G4.ComboBoxes.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G5.DateComboBoxes.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G6.ColorComboBoxes.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G7.FilterableTable.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G8.HierarchicalTable.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${G9.TableUtilsDemo.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${H1.Dashboard.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${I1.Diff.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${N1.Gantt.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${P1.PivotTablePane.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${P2.CalculatedTableModel.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${P3.AggregateTable.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${R1.Charts.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${S1.ShortcutEditor.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${T1.NavigationBar.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${T2.DatabaseTableModel.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${T3.HibernateTableModel.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${W1.Wizard.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${W2.OptionsDialog.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${W3.TipsOfTheDay.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${W4.ButtonPanel.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${W5.BannerPanel.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${W6.StandardDialog.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${W7.JideOptionPane.dir}" excludes="${excludes}" includes="${includes}">
+                <filename name="**/doc-files/**"/>
+            </fileset>
+            <fileset dir="${build.generated.sources.dir}" erroronmissingdir="false">
+                <include name="**/doc-files/**"/>
+            </fileset>
+        </copy>
+    </target>
+    <target depends="init,-javadoc-build" if="netbeans.home" name="-javadoc-browse" unless="no.javadoc.preview">
+        <nbbrowse file="${dist.javadoc.dir}/index.html"/>
+    </target>
+    <target depends="init,-javadoc-build,-javadoc-browse" description="Build Javadoc." name="javadoc"/>
+    <!--
+                =========================
+                JUNIT COMPILATION SECTION
+                =========================
+            -->
+    <target depends="init,compile" if="have.tests" name="-pre-pre-compile-test">
+        <mkdir dir="${build.test.classes.dir}"/>
+    </target>
+    <target name="-pre-compile-test">
+        <!-- Empty placeholder for easier customization. -->
+        <!-- You can override this target in the ../build.xml file. -->
+    </target>
+    <target if="do.depend.true" name="-compile-test-depend">
+        <j2seproject3:depend classpath="${javac.test.classpath}" destdir="${build.test.classes.dir}" srcdir=""/>
+    </target>
+    <target depends="init,deps-jar,compile,-pre-pre-compile-test,-pre-compile-test,-compile-test-depend" if="have.tests"
+            name="-do-compile-test">
+        <j2seproject3:javac apgeneratedsrcdir="${build.test.classes.dir}" classpath="${javac.test.classpath}"
+                            debug="true" destdir="${build.test.classes.dir}" processorpath="${javac.test.processorpath}"
+                            srcdir=""/>
+        <copy todir="${build.test.classes.dir}"/>
+    </target>
+    <target name="-post-compile-test">
+        <!-- Empty placeholder for easier customization. -->
+        <!-- You can override this target in the ../build.xml file. -->
+    </target>
+    <target depends="init,compile,-pre-pre-compile-test,-pre-compile-test,-do-compile-test,-post-compile-test"
+            name="compile-test"/>
+    <target name="-pre-compile-test-single">
+        <!-- Empty placeholder for easier customization. -->
+        <!-- You can override this target in the ../build.xml file. -->
+    </target>
+    <target depends="init,deps-jar,compile,-pre-pre-compile-test,-pre-compile-test-single" if="have.tests"
+            name="-do-compile-test-single">
+        <fail unless="javac.includes">Must select some files in the IDE or set javac.includes</fail>
+        <j2seproject3:force-recompile destdir="${build.test.classes.dir}"/>
+        <j2seproject3:javac apgeneratedsrcdir="${build.test.classes.dir}" classpath="${javac.test.classpath}"
+                            debug="true" destdir="${build.test.classes.dir}" excludes="" includes="${javac.includes}"
+                            processorpath="${javac.test.processorpath}" sourcepath="" srcdir=""/>
+        <copy todir="${build.test.classes.dir}"/>
+    </target>
+    <target name="-post-compile-test-single">
+        <!-- Empty placeholder for easier customization. -->
+        <!-- You can override this target in the ../build.xml file. -->
+    </target>
+    <target depends="init,compile,-pre-pre-compile-test,-pre-compile-test-single,-do-compile-test-single,-post-compile-test-single"
+            name="compile-test-single"/>
+    <!--
+                =======================
+                JUNIT EXECUTION SECTION
+                =======================
+            -->
+    <target depends="init" if="have.tests" name="-pre-test-run">
+        <mkdir dir="${build.test.results.dir}"/>
+    </target>
+    <target depends="init,compile-test,-pre-test-run" if="have.tests" name="-do-test-run">
+        <j2seproject3:junit testincludes="**/*Test.java"/>
+    </target>
+    <target depends="init,compile-test,-pre-test-run,-do-test-run" if="have.tests" name="-post-test-run">
+        <fail if="tests.failed" unless="ignore.failing.tests">Some tests failed; see details above.</fail>
+    </target>
+    <target depends="init" if="have.tests" name="test-report"/>
+    <target depends="init" if="netbeans.home+have.tests" name="-test-browse"/>
+    <target depends="init,compile-test,-pre-test-run,-do-test-run,test-report,-post-test-run,-test-browse"
+            description="Run unit tests." name="test"/>
+    <target depends="init" if="have.tests" name="-pre-test-run-single">
+        <mkdir dir="${build.test.results.dir}"/>
+    </target>
+    <target depends="init,compile-test-single,-pre-test-run-single" if="have.tests" name="-do-test-run-single">
+        <fail unless="test.includes">Must select some files in the IDE or set test.includes</fail>
+        <j2seproject3:junit excludes="" includes="${test.includes}"/>
+    </target>
+    <target depends="init,compile-test-single,-pre-test-run-single,-do-test-run-single" if="have.tests"
+            name="-post-test-run-single">
+        <fail if="tests.failed" unless="ignore.failing.tests">Some tests failed; see details above.</fail>
+    </target>
+    <target depends="init,compile-test-single,-pre-test-run-single,-do-test-run-single,-post-test-run-single"
+            description="Run single unit test." name="test-single"/>
+    <!--
+                =======================
+                JUNIT DEBUGGING SECTION
+                =======================
+            -->
+    <target depends="init,compile-test" if="have.tests" name="-debug-start-debuggee-test">
+        <fail unless="test.class">Must select one file in the IDE or set test.class</fail>
+        <property location="${build.test.results.dir}/TEST-${test.class}.xml" name="test.report.file"/>
+        <delete file="${test.report.file}"/>
+        <mkdir dir="${build.test.results.dir}"/>
+        <j2seproject3:debug classname="org.apache.tools.ant.taskdefs.optional.junit.JUnitTestRunner"
+                            classpath="${ant.home}/lib/ant.jar:${ant.home}/lib/ant-junit.jar:${debug.test.classpath}">
+            <customize>
+                <syspropertyset>
+                    <propertyref prefix="test-sys-prop."/>
+                    <mapper from="test-sys-prop.*" to="*" type="glob"/>
+                </syspropertyset>
+                <arg value="${test.class}"/>
+                <arg value="showoutput=true"/>
+                <arg value="formatter=org.apache.tools.ant.taskdefs.optional.junit.BriefJUnitResultFormatter"/>
+                <arg value="formatter=org.apache.tools.ant.taskdefs.optional.junit.XMLJUnitResultFormatter,${test.report.file}"/>
+            </customize>
+        </j2seproject3:debug>
+    </target>
+    <target depends="init,compile-test" if="netbeans.home+have.tests" name="-debug-start-debugger-test">
+        <j2seproject1:nbjpdastart classpath="${debug.test.classpath}" name="${test.class}"/>
+    </target>
+    <target depends="init,compile-test-single,-debug-start-debugger-test,-debug-start-debuggee-test" name="debug-test"/>
+    <target depends="init,-pre-debug-fix,compile-test-single" if="netbeans.home" name="-do-debug-fix-test">
+        <j2seproject1:nbjpdareload dir="${build.test.classes.dir}"/>
+    </target>
+    <target depends="init,-pre-debug-fix,-do-debug-fix-test" if="netbeans.home" name="debug-fix-test"/>
+    <!--
+                =========================
+                APPLET EXECUTION SECTION
+                =========================
+            -->
+    <target depends="init,compile-single" name="run-applet">
+        <fail unless="applet.url">Must select one file in the IDE or set applet.url</fail>
+        <j2seproject1:java classname="sun.applet.AppletViewer">
+            <customize>
+                <arg value="${applet.url}"/>
+            </customize>
+        </j2seproject1:java>
+    </target>
+    <!--
+                =========================
+                APPLET DEBUGGING  SECTION
+                =========================
+            -->
+    <target depends="init,compile-single" if="netbeans.home" name="-debug-start-debuggee-applet">
+        <fail unless="applet.url">Must select one file in the IDE or set applet.url</fail>
+        <j2seproject3:debug classname="sun.applet.AppletViewer">
+            <customize>
+                <arg value="${applet.url}"/>
+            </customize>
+        </j2seproject3:debug>
+    </target>
+    <target depends="init,compile-single,-debug-start-debugger,-debug-start-debuggee-applet" if="netbeans.home"
+            name="debug-applet"/>
+    <!--
+                ===============
+                CLEANUP SECTION
+                ===============
+            -->
+    <target name="-deps-clean-init" unless="built-clean.properties">
+        <property location="${build.dir}/built-clean.properties" name="built-clean.properties"/>
+        <delete file="${built-clean.properties}" quiet="true"/>
+    </target>
+    <target if="already.built.clean.${basedir}" name="-warn-already-built-clean">
+        <echo level="warn" message="Cycle detected: JideDemos was already built"/>
+    </target>
+    <target depends="init,-deps-clean-init" name="deps-clean" unless="no.deps">
+        <mkdir dir="${build.dir}"/>
+        <touch file="${built-clean.properties}" verbose="false"/>
+        <property file="${built-clean.properties}" prefix="already.built.clean."/>
+        <antcall target="-warn-already-built-clean"/>
+        <propertyfile file="${built-clean.properties}">
+            <entry key="${basedir}" value=""/>
+        </propertyfile>
+    </target>
+    <target depends="init" name="-do-clean">
+        <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}" followsymlinks="false" includeemptydirs="true"/>
+    </target>
+    <target name="-post-clean">
+        <!-- Empty placeholder for easier customization. -->
+        <!-- You can override this target in the ../build.xml file. -->
+    </target>
+    <target depends="init,deps-clean,-do-clean,-post-clean" description="Clean build products." name="clean"/>
+    <target name="-check-call-dep">
+        <property file="${call.built.properties}" prefix="already.built."/>
+        <condition property="should.call.dep">
+            <not>
+                <isset property="already.built.${call.subproject}"/>
+            </not>
+        </condition>
+    </target>
+    <target depends="-check-call-dep" if="should.call.dep" name="-maybe-call-dep">
+        <ant antfile="${call.script}" inheritall="false" target="${call.target}">
+            <propertyset>
+                <propertyref prefix="transfer."/>
+                <mapper from="transfer.*" to="*" type="glob"/>
+            </propertyset>
+        </ant>
+    </target>
+</project>

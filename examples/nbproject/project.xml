@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://www.netbeans.org/ns/project/1">
+    <type>org.netbeans.modules.java.j2seproject</type>
+    <configuration>
+        <data xmlns="http://www.netbeans.org/ns/j2se-project/3">
+            <name>JideDemos</name>
+            <explicit-platform explicit-source-supported="true"/>
+            <source-roots>
+                <root id="src.dir"/>
+                <root id="A2.SampleVsnet.dir"/>
+                <root id="A4.ThreeActionFramework.dir"/>
+                <root id="B1.Layouts.dir"/>
+                <root id="B10.CheckBoxList.dir"/>
+                <root id="B11.AutosizingTextArea.dir"/>
+                <root id="B12.IndeterminateProgressBar.dir"/>
+                <root id="B13.AutoCompletion.dir"/>
+                <root id="B14.IntelliHints.dir"/>
+                <root id="B15.StyledLabel.dir"/>
+                <root id="B16.CheckBoxTree.dir"/>
+                <root id="B17.RangeSlider.dir"/>
+                <root id="B18.FolderChooser.dir"/>
+                <root id="B19.Overlayable.dir"/>
+                <root id="B2.IconsFactory.dir"/>
+                <root id="B20.TitledSeparator.dir"/>
+                <root id="B21.MarqueePane.dir"/>
+                <root id="B3.Borders.dir"/>
+                <root id="B4.JideButton.dir"/>
+                <root id="B5.JideSplitPane.dir"/>
+                <root id="B6.JideTabbedPane.dir"/>
+                <root id="B7.SearchableComponents.dir"/>
+                <root id="B8.JideScrollPane.dir"/>
+                <root id="B9.Popup.dir"/>
+                <root id="C1.DocumentPane.dir"/>
+                <root id="C2.StatusBar.dir"/>
+                <root id="C3.CollapsiblePane.dir"/>
+                <root id="C4.FloorTabbedPane.dir"/>
+                <root id="C6.Alert.dir"/>
+                <root id="C7.Tip.dir"/>
+                <root id="C8.BreadcrumbBar.dir"/>
+                <root id="C9.NavigationComponent.dir"/>
+                <root id="D1.DockingFramework.dir"/>
+                <root id="D2.TwoDockingFramework.dir"/>
+                <root id="D3.InitialLayoutDockingFramework.dir"/>
+                <root id="Demo.dir"/>
+                <root id="E1.CodeEditor.dir"/>
+                <root id="F1.FeedReader.dir"/>
+                <root id="G1.PropertyPane.dir"/>
+                <root id="G10.TableScrollPane.dir"/>
+                <root id="G11.TableSplitPane.dir"/>
+                <root id="G12.JideTable.dir"/>
+                <root id="G13.DirectionChooserDemo.dir"/>
+                <root id="G14.Converter.dir"/>
+                <root id="G15.QuickFilter.dir"/>
+                <root id="G16.SpanTable.dir"/>
+                <root id="G17.StyleTable.dir"/>
+                <root id="G18.TreeTable.dir"/>
+                <root id="G19.SortableList.dir"/>
+                <root id="G2.SortableTable.dir"/>
+                <root id="G20.SortableTree.dir"/>
+                <root id="G21.Spinners.dir"/>
+                <root id="G22.ImagePreviewList.dir"/>
+                <root id="G23.TextFields.dir"/>
+                <root id="G24.Calculator.dir"/>
+                <root id="G25.CachedTableModel.dir"/>
+                <root id="G26.ContextSensitiveTable.dir"/>
+                <root id="G27.TableHeader.dir"/>
+                <root id="G28.GroupTable.dir"/>
+                <root id="G29.BeanTableModel.dir"/>
+                <root id="G3.LargeSortableTable.dir"/>
+                <root id="G30.GroupList.dir"/>
+                <root id="G31.DualList.dir"/>
+                <root id="G32.NavigableTable.dir"/>
+                <root id="G33.CustomFilterEditor.dir"/>
+                <root id="G34.CellStyleEditor.dir"/>
+                <root id="G35.ShrinkSearchableSupport.dir"/>
+                <root id="G36.TransposeTableModel.dir"/>
+                <root id="G37.MarkerMargin.dir"/>
+                <root id="G4.ComboBoxes.dir"/>
+                <root id="G5.DateComboBoxes.dir"/>
+                <root id="G6.ColorComboBoxes.dir"/>
+                <root id="G7.FilterableTable.dir"/>
+                <root id="G8.HierarchicalTable.dir"/>
+                <root id="G9.TableUtilsDemo.dir"/>
+                <root id="H1.Dashboard.dir"/>
+                <root id="I1.Diff.dir"/>
+                <root id="N1.Gantt.dir"/>
+                <root id="P1.PivotTablePane.dir"/>
+                <root id="P2.CalculatedTableModel.dir"/>
+                <root id="P3.AggregateTable.dir"/>
+                <root id="R1.Charts.dir"/>
+                <root id="S1.ShortcutEditor.dir"/>
+                <root id="T1.NavigationBar.dir"/>
+                <root id="T2.DatabaseTableModel.dir"/>
+                <root id="T3.HibernateTableModel.dir"/>
+                <root id="W1.Wizard.dir"/>
+                <root id="W2.OptionsDialog.dir"/>
+                <root id="W3.TipsOfTheDay.dir"/>
+                <root id="W4.ButtonPanel.dir"/>
+                <root id="W5.BannerPanel.dir"/>
+                <root id="W6.StandardDialog.dir"/>
+                <root id="W7.JideOptionPane.dir"/>
+            </source-roots>
+            <test-roots/>
+        </data>
+        <libraries xmlns="http://www.netbeans.org/ns/ant-project-libraries/1">
+            <definitions>.\nblibraries.properties</definitions>
+        </libraries>
+    </configuration>
+</project>
